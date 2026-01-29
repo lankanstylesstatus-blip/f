@@ -11,50 +11,51 @@
             --success: #238636; --error: #da3633; --text: #c9d1d9;
             --opt-bg: #21262d; --border: #30363d;
         }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; }
+        body { font-family: 'Segoe UI', 'Pothana', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; }
         .container { max-width: 700px; margin: auto; }
         .card { background: var(--card); padding: 25px; border-radius: 15px; border: 1px solid var(--border); box-shadow: 0 8px 24px rgba(0,0,0,0.5); margin-bottom: 20px; }
-        
         h2 { color: var(--primary); text-align: center; margin-bottom: 15px; }
         .grid-menu { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 15px; }
-        
         .menu-btn { background: var(--opt-bg); border: 1px solid var(--border); color: white; padding: 18px; border-radius: 10px; cursor: pointer; font-size: 15px; font-weight: bold; transition: 0.3s; text-align: center; }
         .menu-btn:hover { background: var(--primary); color: #000; transform: translateY(-3px); }
-        
         input, select { width: 100%; padding: 12px; margin-top: 10px; border-radius: 8px; border: 1px solid var(--border); background: #0d1117; color: white; box-sizing: border-box; }
-        
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
         .stat-box { background: #0d1117; padding: 15px; border-radius: 10px; text-align: center; border: 1px solid var(--border); }
         .stat-val { font-size: 1.5em; font-weight: bold; color: var(--primary); display: block; }
-
-        .option { background: var(--opt-bg); padding: 15px; border-radius: 10px; margin-bottom: 10px; cursor: pointer; border: 1px solid var(--border); transition: 0.2s; }
+        .option { background: var(--opt-bg); padding: 15px; border-radius: 10px; margin-bottom: 10px; cursor: pointer; border: 1px solid var(--border); transition: 0.2s; position: relative; }
         .correct { border-color: var(--success) !important; background: rgba(35, 134, 54, 0.15) !important; }
         .wrong { border-color: var(--error) !important; background: rgba(218, 54, 51, 0.15) !important; }
-        .explanation { font-size: 0.9em; color: #8b949e; margin-top: 10px; display: none; padding-top: 10px; border-top: 1px solid var(--border); line-height: 1.5; }
-        
+        .explanation { font-size: 0.85em; color: #8b949e; margin-top: 8px; display: none; border-top: 1px solid var(--border); padding-top: 5px; }
         .action-btn { background: var(--success); color: white; border: none; padding: 15px; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 15px; font-size: 16px; }
         .hidden { display: none; }
-        .back-link { color: var(--primary); cursor: pointer; font-size: 0.8em; display: inline-block; margin-bottom: 10px; }
+        
+        /* Progress & Timer */
+        .progress-container { width: 100%; background: #30363d; height: 8px; border-radius: 10px; margin: 15px 0; }
+        .progress-bar { height: 100%; background: var(--primary); width: 0%; border-radius: 10px; transition: 0.5s; }
+        .timer-txt { text-align: right; color: #f85149; font-weight: bold; font-family: monospace; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div id="setupScreen" class="card">
-        <h2>සාදරයෙන් පිළිගනිමු</h2>
-        <label>ඔබේ ශ්‍රේණිය තෝරන්න:</label>
+        <h2>Smart School Setup</h2>
+        <label>ශ්‍රේණිය තෝරන්න:</label>
         <select id="gradeSelect" onchange="toggleALStreams()">
             <option value="6">Grade 6</option><option value="7">Grade 7</option>
             <option value="8">Grade 8</option><option value="9">Grade 9</option>
             <option value="10">Grade 10</option><option value="11">Grade 11 (O/L)</option>
-            <option value="AL">A/L (Advanced Level)</option>
+            <option value="AL">Grade 12-13 (A/L)</option>
         </select>
 
         <div id="alStreamDiv" class="hidden">
             <label>විෂය ධාරාව (Stream):</label>
             <select id="streamSelect">
-                <option value="Science">Bio Science</option><option value="Maths">Physical Science</option>
-                <option value="Art">Art</option><option value="Commerce">Commerce</option><option value="Tech">Tech</option>
+                <option value="Bio">Bio Science</option>
+                <option value="Maths">Combined Maths</option>
+                <option value="Art">Art</option>
+                <option value="Commerce">Commerce</option>
+                <option value="Tech">Technology</option>
             </select>
         </div>
 
@@ -70,19 +71,21 @@
             <div class="stat-box">ඉතිරි දින<span id="dLeft" class="stat-val">0</span></div>
             <div class="stat-box">මුළු ලකුණු<span id="tScore" class="stat-val">0</span></div>
         </div>
-        <div style="height: 200px; margin-bottom: 20px;"><canvas id="progChart"></canvas></div>
-        <h3 style="font-size: 1em;">විෂය තෝරා ප්‍රශ්න වලට පිළිතුරු දෙන්න:</h3>
+        <div style="height: 180px; margin-bottom: 20px;"><canvas id="progChart"></canvas></div>
+        <h3>විෂය තෝරන්න:</h3>
         <div id="subjectGrid" class="grid-menu"></div>
-        <button onclick="resetAll()" style="background:none; border:none; color:var(--error); font-size:10px; margin-top:20px; cursor:pointer;">දත්ත මකන්න (Reset)</button>
+        <button onclick="resetAll()" style="background:none; border:none; color:var(--error); font-size:10px; margin-top:20px; cursor:pointer; width:100%;">සියලු දත්ත මකන්න (Reset)</button>
     </div>
 
     <div id="quizArea" class="card hidden">
-        <span class="back-link" onclick="showDashboard()">← Dashboard</span>
-        <div style="display:flex; justify-content:space-between; color:var(--primary); font-weight:bold; font-size:0.9em; margin-bottom:10px;">
-            <span id="qCountDisp">ප්‍රශ්නය 1</span>
-            <span id="subTag">SUBJECT</span>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="color:var(--primary); font-weight:bold;" id="subTag">SUBJECT</span>
+            <span class="timer-txt">කාලය: <span id="timer">15</span>s</span>
         </div>
-        <h3 id="qTxt" style="text-align:left; line-height:1.4;">ප්‍රශ්නය මෙතැන...</h3>
+        
+        <div class="progress-container"><div id="pBar" class="progress-bar"></div></div>
+        
+        <h3 id="qTxt" style="margin-top:0;">ප්‍රශ්නය මෙතැන...</h3>
         <div id="optCont"></div>
         <button id="nextBtn" class="action-btn hidden" onclick="handleNext()">මීළඟ ප්‍රශ්නය</button>
     </div>
@@ -90,18 +93,34 @@
 
 <script>
     let appData = JSON.parse(localStorage.getItem('studentMasterDB')) || null;
-    let currentScore = 0, currentIdx = 0, currentSub = "", chartInst = null;
+    let currentScore = 0, currentIdx = 0, currentSub = "", chartInst = null, timerInt = null;
 
     const subjects = {
-        "6": ["විද්‍යාව", "ගණිතය", "ඉතිහාසය", "සිංහල"],
-        "11": ["විද්‍යාව", "ගණිතය", "ඉතිහාසය", "ICT", "කෘෂිකර්මය"],
-        "Science": ["රසායන විද්‍යාව", "භෞතික විද්‍යාව", "ජීව විද්‍යාව"],
-        "Maths": ["රසායන විද්‍යාව", "භෞතික විද්‍යාව", "සංයුක්ත ගණිතය"]
+        "6": ["විද්‍යාව", "ගණිතය", "ඉතිහාසය", "සිංහල", "ඉංග්‍රීසි", "බුද්ධ ධර්මය"],
+        "7": ["විද්‍යාව", "ගණිතය", "ඉතිහාසය", "සිංහල", "ඉංග්‍රීසි", "බුද්ධ ධර්මය"],
+        "8": ["විද්‍යාව", "ගණිතය", "ඉතිහාසය", "සිංහල", "ඉංග්‍රීසි", "බුද්ධ ධර්මය"],
+        "9": ["විද්‍යාව", "ගණිතය", "ඉතිහාසය", "සිංහල", "ඉංග්‍රීසි", "බුද්ධ ධර්මය"],
+        "10": ["විද්‍යාව", "ගණිතය", "ඉතිහාසය", "සිංහල", "ඉංග්‍රීසි", "බුද්ධ ධර්මය", "ICT", "කෘෂිකර්මය", "වාණිජ්‍ය"],
+        "11": ["විද්‍යාව", "ගණිතය", "ඉතිහාසය", "සිංහල", "ඉංග්‍රීසි", "බුද්ධ ධර්මය", "ICT", "කෘෂිකර්මය", "වාණිජ්‍ය"],
+        "Bio": ["ජීව විද්‍යාව", "රසායන විද්‍යාව", "භෞතික විද්‍යාව"],
+        "Maths": ["සංයුක්ත ගණිතය", "රසායන විද්‍යාව", "භෞතික විද්‍යාව"],
+        "Art": ["සිංහල", "දේශපාලන විද්‍යාව", "ඉතිහාසය", "භූගෝල විද්‍යාව"],
+        "Commerce": ["ගිණුම්කරණය", "ව්‍යාපාර අධ්‍යයනය", "ආර්ථික විද්‍යාව"],
+        "Tech": ["ඉංජිනේරු තාක්ෂණය", "ජෛව පද්ධති තාක්ෂණය", "SFT"]
     };
 
     const questionsDB = {
-        "විද්‍යාව": [{q: "පරමාණුවේ න්‍යෂ්ටිය තුළ ඇති අංශු මොනවාද?", o: ["ඉලෙක්ට්‍රෝන හා ප්‍රෝටෝන", "ප්‍රෝටෝන හා නියුට්‍රෝන", "ඉලෙක්ට්‍රෝන හා නියුට්‍රෝන", "ප්‍රෝටෝන පමණි"], c: 1, ex: ["ඉලෙක්ට්‍රෝන න්‍යෂ්ටිය වටා ගමන් කරයි.", "ප්‍රෝටෝන හා නියුට්‍රෝන න්‍යෂ්ටිය තුළ පිහිටා ඇත.", "", ""]}],
-        "රසායන විද්‍යාව": [{q: "H2O අණුවේ හැඩය කුමක්ද?", o: ["රේඛීය", "කෝණික", "චතුස්තලීය", "තල ත්‍රිකෝණාකාර"], c: 1, ex: ["හුදකලා ඉලෙක්ට්‍රෝන යුගල නිසා ජල අණුව කෝණික වේ.", "", "", ""]}]
+        "විද්‍යාව": [
+            {q: "පරමාණුවේ න්‍යෂ්ටිය තුළ ඇති අංශු මොනවාද?", o: ["ඉලෙක්ට්‍රෝන හා ප්‍රෝටෝන", "ප්‍රෝටෝන හා නියුට්‍රෝන", "ඉලෙක්ට්‍රෝන හා නියුට්‍රෝන", "ප්‍රෝටෝන පමණි"], c: 1, ex: ["ප්‍රෝටෝන හා නියුට්‍රෝන න්‍යෂ්ටියේ ඇත. ඉලෙක්ට්‍රෝන පිටතින් පවතී."]},
+            {q: "ප්‍රභාසංස්ලේෂණයේදී පිටවන වායුව කුමක්ද?", o: ["කාබන්ඩයොක්සයිඩ්", "නයිට්‍රජන්", "ඔක්සිජන්", "හයිඩ්‍රජන්"], c: 2, ex: ["ප්‍රභාසංස්ලේෂණයේ ඵලයක් ලෙස ඔක්සිජන් වායුව පිටවේ."]}
+        ],
+        "ගණිතය": [
+            {q: "2x + 5 = 15 නම්, x හි අගය කීයද?", o: ["10", "5", "7.5", "2"], c: 1, ex: ["2x = 15-5 -> 2x = 10 -> x = 5"]},
+            {q: "ත්‍රිකෝණයක අභ්‍යන්තර කෝණවල එකතුව කීයද?", o: ["90°", "180°", "360°", "270°"], c: 1, ex: ["ඕනෑම ත්‍රිකෝණයක අභ්‍යන්තර කෝණ එකතුව 180° කි."]}
+        ],
+        "රසායන විද්‍යාව": [
+            {q: "H2O අණුවේ හැඩය කුමක්ද?", o: ["රේඛීය", "කෝණික", "චතුස්තලීය", "තල ත්‍රිකෝණාකාර"], c: 1, ex: ["හුදකලා ඉලෙක්ට්‍රෝන යුගල නිසා ජල අණුව කෝණික වේ."]}
+        ]
     };
 
     function toggleALStreams() {
@@ -113,7 +132,6 @@
         const grade = document.getElementById('gradeSelect').value;
         const days = document.getElementById('daysGoal').value;
         const stream = document.getElementById('streamSelect').value;
-        
         if(!days) return alert("කරුණාකර දින ගණන ඇතුළත් කරන්න.");
 
         appData = {
@@ -156,9 +174,18 @@
     }
 
     function loadQuestion() {
+        clearInterval(timerInt);
         const qList = questionsDB[currentSub] || questionsDB["විද්‍යාව"];
+        
+        // Progress bar update
+        document.getElementById('pBar').style.width = ((currentIdx) / qList.length) * 100 + "%";
+
+        if(currentIdx >= qList.length) {
+            finishQuiz();
+            return;
+        }
+
         const q = qList[currentIdx];
-        document.getElementById('qCountDisp').innerText = `ප්‍රශ්නය ${currentIdx + 1}`;
         document.getElementById('qTxt').innerText = q.q;
         const cont = document.getElementById('optCont');
         cont.innerHTML = "";
@@ -167,24 +194,54 @@
         q.o.forEach((opt, i) => {
             const d = document.createElement('div');
             d.className = 'option';
-            d.innerHTML = `<b>${i+1}.</b> ${opt} <div class="explanation">${q.ex[i]}</div>`;
-            d.onclick = () => {
-                document.querySelectorAll('.option').forEach(el => el.style.pointerEvents = 'none');
-                if(i === q.c) { d.classList.add('correct'); currentScore += 10; }
-                else { d.classList.add('wrong'); document.querySelectorAll('.option')[q.c].classList.add('correct'); }
-                document.querySelectorAll('.explanation').forEach(e => e.style.display = 'block');
-                document.getElementById('nextBtn').classList.remove('hidden');
-            };
+            d.innerHTML = `<b>${i+1}.</b> ${opt} <div class="explanation">${q.ex[0] || ""}</div>`;
+            d.onclick = () => checkAnswer(i, q.c, d);
             cont.appendChild(d);
         });
+
+        startTimer();
+    }
+
+    function startTimer() {
+        let time = 15;
+        document.getElementById('timer').innerText = time;
+        timerInt = setInterval(() => {
+            time--;
+            document.getElementById('timer').innerText = time;
+            if(time <= 0) {
+                clearInterval(timerInt);
+                checkAnswer(-1, questionsDB[currentSub][currentIdx].c, null);
+            }
+        }, 1000);
+    }
+
+    function checkAnswer(selected, correct, element) {
+        clearInterval(timerInt);
+        const options = document.querySelectorAll('.option');
+        options.forEach(opt => opt.style.pointerEvents = 'none');
+
+        if(selected === correct) {
+            element.classList.add('correct');
+            currentScore += 10;
+        } else {
+            if(element) element.classList.add('wrong');
+            options[correct].classList.add('correct');
+        }
+        
+        document.querySelectorAll('.explanation').forEach(ex => ex.style.display = 'block');
+        document.getElementById('nextBtn').classList.remove('hidden');
     }
 
     function handleNext() {
-        const qList = questionsDB[currentSub] || questionsDB["විද්‍යාව"];
+        currentIdx++;
+        loadQuestion();
+    }
+
+    function finishQuiz() {
         appData.history.push({ day: appData.history.length + 1, score: currentScore });
         appData.totalScore += currentScore;
         localStorage.setItem('studentMasterDB', JSON.stringify(appData));
-        alert("වැඩ අවසන්! ලකුණු: " + currentScore);
+        alert("වැඩ අවසන්! ඔබ ලබාගත් ලකුණු: " + currentScore);
         showDashboard();
     }
 
@@ -195,9 +252,9 @@
             type: 'line',
             data: {
                 labels: appData.history.map(h => "Day " + h.day),
-                datasets: [{ label: 'Score', data: appData.history.map(h => h.score), borderColor: '#58a6ff', tension: 0.3, fill: true, backgroundColor: 'rgba(88,166,255,0.1)' }]
+                datasets: [{ label: 'ලකුණු', data: appData.history.map(h => h.score), borderColor: '#58a6ff', tension: 0.4, fill: true, backgroundColor: 'rgba(88,166,255,0.1)' }]
             },
-            options: { responsive: true, maintainAspectRatio: false }
+            options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
         });
     }
 
