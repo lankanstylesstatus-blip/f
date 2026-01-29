@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart School - Multi Subject Tracker</title>
+    <title>Smart School - Full Subject Tracker</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -13,93 +13,132 @@
         }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 10px; }
         .container { max-width: 850px; margin: auto; }
-        .card { background: var(--card); padding: 25px; border-radius: 15px; margin-bottom: 20px; border: 1px solid #30363d; }
+        .card { background: var(--card); padding: 25px; border-radius: 15px; margin-bottom: 20px; border: 1px solid #30363d; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
         
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px; margin: 20px 0; }
-        .stat-box { background: #0d1117; padding: 15px; border-radius: 10px; text-align: center; border: 1px solid #30363d; }
-        .stat-num { font-size: 1.5em; font-weight: bold; color: var(--primary); display: block; }
+        h2, h3 { color: var(--primary); text-align: center; }
+        label { display: block; margin-top: 15px; font-weight: bold; color: #8b949e; }
 
-        select, input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #30363d; background: #0d1117; color: white; margin-bottom: 15px; }
-        button { background: var(--success); color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold; }
+        select, input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #30363d; background: #0d1117; color: white; margin-top: 5px; box-sizing: border-box; }
+        button { background: var(--success); color: white; border: none; padding: 15px; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 20px; transition: 0.3s; }
+        button:hover { opacity: 0.8; }
+
+        /* Dashboard & Progress */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; margin: 20px 0; }
+        .stat-box { background: #0d1117; padding: 15px; border-radius: 10px; text-align: center; border: 1px solid #30363d; }
+        .stat-num { font-size: 1.4em; font-weight: bold; color: var(--primary); display: block; }
         
-        .option { background: var(--opt-bg); padding: 15px; border-radius: 10px; margin-bottom: 10px; cursor: pointer; border: 1px solid #30363d; }
+        /* Quiz */
+        .option { background: var(--opt-bg); padding: 15px; border-radius: 10px; margin-bottom: 10px; cursor: pointer; border: 1px solid #30363d; transition: 0.2s; }
+        .option:hover { border-color: var(--primary); }
         .correct { border-color: var(--success) !important; background: rgba(35, 134, 54, 0.1) !important; }
         .wrong { border-color: var(--error) !important; background: rgba(218, 54, 51, 0.1) !important; }
-        .explanation { font-size: 0.9em; color: #8b949e; margin-top: 8px; display: none; padding-top: 8px; border-top: 1px solid #30363d; }
+        .explanation { font-size: 0.9em; color: #8b949e; margin-top: 10px; display: none; padding-top: 10px; border-top: 1px solid #30363d; }
+        
         .hidden { display: none; }
+        .basket-group { padding: 10px; border: 1px dashed #444; border-radius: 8px; margin-top: 10px; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div id="setupScreen" class="card">
-        <h2>ඔබේ ඉගෙනුම් මධ්‍යස්ථානය</h2>
-        <label>ශ්‍රේණිය තෝරන්න:</label>
+        <h2>Smart Student Planner</h2>
+        <p style="text-align:center; font-size: 0.9em;">ඔබේ ශ්‍රේණිය සහ විෂයන් තෝරන්න</p>
+        
+        <label>ශ්‍රේණිය (Grade):</label>
         <select id="gradeSelect">
-            <option value="6">Grade 6</option>
-            <option value="7">Grade 7</option>
+            <option value="10">Grade 10</option>
             <option value="11">Grade 11 (O/L)</option>
-            <option value="13">Grade 13 (A/L)</option>
         </select>
-        
-        <label>විෂය තෝරන්න:</label>
-        <select id="subjectSelect">
-            <option value="science">විද්‍යාව (Science)</option>
-            <option value="maths">ගණිතය (Maths)</option>
-            <option value="history">ඉතිහාසය (History)</option>
-            <option value="chem">රසායන විද්‍යාව (Chemistry)</option>
+
+        <label>අනිවාර්ය විෂයන් (Core Subjects):</label>
+        <select id="coreSubject">
+            <option value="sinhala">සිංහල</option>
+            <option value="maths">ගණිතය</option>
+            <option value="science">විද්‍යාව</option>
+            <option value="english">ඉංග්‍රීසි</option>
+            <option value="history">ඉතිහාසය</option>
+            <option value="religion">ආගම</option>
         </select>
-        
+
+        <div class="basket-group">
+            <label>කාණ්ඩ විෂය I (Basket I):</label>
+            <select id="basket1">
+                <option value="geo">භූගෝල විද්‍යාව</option>
+                <option value="civic">පුරවැසි අධ්‍යාපනය</option>
+                <option value="ict">ICT</option>
+                <option value="entre">ව්‍යවසායකත්ව අධ්‍යයනය</option>
+            </select>
+
+            <label>කාණ්ඩ විෂය II (Basket II):</label>
+            <select id="basket2">
+                <option value="music">සංගීතය</option>
+                <option value="dance">නර්තනය</option>
+                <option value="art">චිත්‍ර කලාව</option>
+                <option value="drama">නාට්‍ය හා රංග කලාව</option>
+            </select>
+
+            <label>කාණ්ඩ විෂය III (Basket III):</label>
+            <select id="basket3">
+                <option value="agri">කෘෂිකර්මය</option>
+                <option value="health">සෞඛ්‍ය හා ශාරීරික අධ්‍යාපනය</option>
+                <option value="tech">තාක්ෂණික විෂයන්</option>
+            </select>
+        </div>
+
         <label>විභාගයට ඇති දින ගණන:</label>
-        <input type="number" id="daysInput" placeholder="උදා: 180">
-        
-        <button onclick="saveSetup()">ඇතුල් වන්න</button>
+        <input type="number" id="daysInput" value="60">
+
+        <button onclick="saveSetup()">වැඩපිළිවෙල ආරම්භ කරන්න</button>
     </div>
 
     <div id="dashboard" class="card hidden">
-        <h2 id="dashTitle">ප්‍රගති වාර්තාව</h2>
+        <h2 id="userTitle">මගේ ප්‍රගතිය</h2>
         <div class="stats-grid">
             <div class="stat-box">ඉතිරි දින<span id="dLeft" class="stat-num">0</span></div>
             <div class="stat-box">මුළු ලකුණු<span id="tScore" class="stat-num">0</span></div>
             <div class="stat-box">Grade<span id="gShow" class="stat-num">-</span></div>
         </div>
-        <div style="height: 200px;"><canvas id="progChart"></canvas></div>
-        <button onclick="startSession()" style="background:var(--primary); margin-top:20px;">අද දින ප්‍රශ්න පත්‍රය ආරම්භ කරන්න</button>
+        <div style="height: 250px;"><canvas id="progChart"></canvas></div>
+        <button onclick="startSession()" style="background:var(--primary); margin-top:20px;">අද දින වැඩ ආරම්භ කරන්න</button>
+        <button onclick="localStorage.clear(); location.reload();" style="background:none; border:1px solid var(--error); color:var(--error); margin-top:10px; padding:5px; font-size:12px;">Reset All</button>
     </div>
 
     <div id="quizArea" class="card hidden">
-        <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:0.8em; color:var(--primary);">
+        <div style="display:flex; justify-content:space-between; margin-bottom:15px; color:var(--primary); font-weight:bold;">
             <span id="qIdxDisp">ප්‍රශ්නය 1</span>
-            <span id="subTag">Science</span>
+            <span id="subTag">SCIENCE</span>
         </div>
-        <h3 id="qTxt">ප්‍රශ්නය මෙතැන දිස්වේ...</h3>
+        <h3 id="qTxt" style="text-align:left; line-height:1.4;">ප්‍රශ්නය මෙතැන දිස්වේ...</h3>
         <div id="optCont"></div>
-        <button id="nextBtn" class="hidden" onclick="nextQ()" style="margin-top:15px;">මීළඟ ප්‍රශ්නය</button>
+        <button id="nextBtn" class="hidden" onclick="nextQ()">මීළඟ ප්‍රශ්නය</button>
     </div>
 </div>
 
 <script>
-    let db = JSON.parse(localStorage.getItem('schoolAppData')) || null;
+    let db = JSON.parse(localStorage.getItem('olTrackerData')) || null;
     let currentScore = 0, currentIdx = 0, chart;
 
-    // විෂය සහ ශ්‍රේණි අනුව ප්‍රශ්න (මෙතනට ඕනෑම ප්‍රමාණයක ප්‍රශ්න එකතු කළ හැක)
     const questions = {
-        "11_science": [
-            {q: "සෛලයේ ශක්ති ඒකකය කුමක්ද?", o: ["න්‍යෂ්ටිය", "මයිටොකොන්ඩ්‍රියාව", "රයිබොසෝම", "සෛල ප්ලාස්මය"], c: 1, ex: ["න්‍යෂ්ටිය පාලන මධ්‍යස්ථානයයි.", "මයිටොකොන්ඩ්‍රියාවේ ATP නිපදවන බැවින් එය ශක්ති ඒකකයයි.", "රයිබොසෝම ප්‍රෝටීන් නිපදවයි.", "ප්ලාස්මය ද්‍රව්‍යයකි."]}
+        "science": [
+            {q: "ශාකයක ප්‍රභාසංස්ලේෂණය වැඩිපුරම සිදුවන්නේ කුමන අවයවයේද?", o: ["මූලය", "පුෂ්පය", "පත්‍රය", "කඳ"], c: 2, ex: ["මූලය ජලය අවශෝෂණය කරයි.", "පුෂ්පය ප්‍රජනක අවයවයයි.", "පත්‍රවල හරිතප්‍රද වැඩි බැවින් ප්‍රභාසංස්ලේෂණය පත්‍රයේ සිදුවේ.", "කඳ ශාකය දරා සිටියි."]}
         ],
-        "13_chem": [
-            {q: "H2O අණුවේ හැඩය කුමක්ද?", o: ["රේඛීය", "තලත්‍රිකෝණාකාර", "කෝණික / නැමුණු", "චතුස්තලීය"], c: 2, ex: ["රේඛීය හැඩය CO2 වල ඇත.", "BF3 තලත්‍රිකෝණාකාර වේ.", "ඔක්සිජන් මත ඇති හුදකලා ඉලෙක්ට්‍රෝන යුගල නිසා ජල අණුව කෝණික වේ.", "CH4 චතුස්තලීය වේ."]}
+        "ict": [
+            {q: "පහත ඒවායින් ප්‍රධාන මතක උපාංගයක් (Primary Memory) වන්නේ කුමක්ද?", o: ["Hard Disk", "RAM", "Pen Drive", "CD"], c: 1, ex: ["Hard Disk ද්විතීයික මතකයකි.", "RAM යනු ප්‍රධාන මතකයයි. එය තාවකාලික මතකයකි.", "Pen Drive බාහිර මතකයකි.", "CD ද්විතීයික මතකයකි."]}
         ]
     };
 
     function saveSetup() {
         db = {
             grade: document.getElementById('gradeSelect').value,
-            subject: document.getElementById('subjectSelect').value,
+            core: document.getElementById('coreSubject').value,
+            b1: document.getElementById('basket1').value,
+            b2: document.getElementById('basket2').value,
+            b3: document.getElementById('basket3').value,
             days: document.getElementById('daysInput').value,
             history: [], total: 0
         };
-        localStorage.setItem('schoolAppData', JSON.stringify(db));
+        localStorage.setItem('olTrackerData', JSON.stringify(db));
         showDash();
     }
 
@@ -120,25 +159,27 @@
             type: 'line',
             data: {
                 labels: db.history.map(h => "Day " + h.d),
-                datasets: [{ label: 'Score', data: db.history.map(h => h.s), borderColor: '#58a6ff', tension: 0.3 }]
+                datasets: [{ label: 'ලකුණු මට්ටම', data: db.history.map(h => h.s), borderColor: '#58a6ff', backgroundColor: 'rgba(88, 166, 255, 0.1)', fill: true, tension: 0.3 }]
             },
-            options: { maintainAspectRatio: false }
+            options: { responsive: true, maintainAspectRatio: false }
         });
     }
 
     function startSession() {
         document.getElementById('dashboard').classList.add('hidden');
         document.getElementById('quizArea').classList.remove('hidden');
-        document.getElementById('subTag').innerText = db.subject.toUpperCase();
+        // අහඹු ලෙස විෂයක් තෝරාගැනීම (Core හෝ Basket එකකින්)
+        const subs = [db.core, db.b1, db.b2, db.b3];
+        const randomSub = subs[Math.floor(Math.random() * subs.length)];
+        document.getElementById('subTag').innerText = randomSub.toUpperCase();
+        
         currentScore = 0; currentIdx = 0;
-        loadQ();
+        loadQ(randomSub);
     }
 
-    function loadQ() {
-        const key = `${db.grade}_${db.subject}`;
-        const qList = questions[key] || questions["11_science"];
+    function loadQ(sub) {
+        const qList = questions[sub] || questions["science"];
         const q = qList[currentIdx];
-        
         document.getElementById('qTxt').innerText = q.q;
         const cont = document.getElementById('optCont');
         cont.innerHTML = "";
@@ -160,17 +201,11 @@
     }
 
     function nextQ() {
-        const key = `${db.grade}_${db.subject}`;
-        const qList = questions[key] || questions["11_science"];
-        currentIdx++;
-        if(currentIdx < qList.length) loadQ();
-        else {
-            db.history.push({d: db.history.length + 1, s: currentScore});
-            db.total += currentScore;
-            localStorage.setItem('schoolAppData', JSON.stringify(db));
-            alert("අද දින වැඩ අවසන්!");
-            showDash();
-        }
+        // දැනට එක් ප්‍රශ්නයක් පමණක් පෙන්වයි. දත්ත වැඩි කරද්දී මෙය වෙනස් කළ හැක.
+        db.history.push({d: db.history.length + 1, s: currentScore});
+        db.total += currentScore;
+        localStorage.setItem('olTrackerData', JSON.stringify(db));
+        showDash();
     }
 
     if(db) showDash();
