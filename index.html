@@ -3,35 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chemistry Pro - Learning & Progress Tracker</title>
+    <title>Smart School - Multi Subject Tracker</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            --bg: #0a0a0a; --card: #161616; --primary: #3498db;
-            --success: #2ecc71; --error: #e74c3c; --text: #ffffff;
-            --opt-bg: #222;
+            --bg: #0d1117; --card: #161b22; --primary: #58a6ff;
+            --success: #238636; --error: #da3633; --text: #c9d1d9;
+            --opt-bg: #21262d;
         }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; }
-        .container { max-width: 800px; margin: auto; }
-        .card { background: var(--card); padding: 25px; border-radius: 20px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 10px; }
+        .container { max-width: 850px; margin: auto; }
+        .card { background: var(--card); padding: 25px; border-radius: 15px; margin-bottom: 20px; border: 1px solid #30363d; }
         
-        /* Stats Dashboard */
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0; }
-        .stat-box { background: #1e1e1e; padding: 15px; border-radius: 12px; text-align: center; border-bottom: 4px solid var(--primary); }
-        .stat-num { font-size: 1.6em; font-weight: bold; display: block; color: var(--primary); }
-        .chart-container { position: relative; height: 250px; width: 100%; margin: 20px 0; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px; margin: 20px 0; }
+        .stat-box { background: #0d1117; padding: 15px; border-radius: 10px; text-align: center; border: 1px solid #30363d; }
+        .stat-num { font-size: 1.5em; font-weight: bold; color: var(--primary); display: block; }
 
-        /* UI Elements */
-        select, input { width: 100%; padding: 15px; border-radius: 10px; border: 1px solid #333; background: #222; color: white; margin-bottom: 15px; font-size: 16px; }
-        button { background: var(--primary); color: white; border: none; padding: 15px; border-radius: 10px; cursor: pointer; width: 100%; font-weight: bold; font-size: 16px; }
+        select, input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #30363d; background: #0d1117; color: white; margin-bottom: 15px; }
+        button { background: var(--success); color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold; }
         
-        /* MCQ Styling */
-        .option { background: var(--opt-bg); padding: 18px; border-radius: 12px; margin-bottom: 12px; cursor: pointer; border: 2px solid transparent; transition: 0.3s; }
-        .correct-final { border-color: var(--success) !important; background: rgba(46, 204, 113, 0.1) !important; }
-        .wrong-final { border-color: var(--error) !important; background: rgba(231, 76, 60, 0.1) !important; }
-        .explanation { font-size: 0.9em; color: #b0b0b0; margin-top: 10px; display: none; line-height: 1.5; border-top: 1px solid #444; pt-10; }
-        .fb-tag { font-weight: bold; margin-bottom: 5px; display: block; }
-        
+        .option { background: var(--opt-bg); padding: 15px; border-radius: 10px; margin-bottom: 10px; cursor: pointer; border: 1px solid #30363d; }
+        .correct { border-color: var(--success) !important; background: rgba(35, 134, 54, 0.1) !important; }
+        .wrong { border-color: var(--error) !important; background: rgba(218, 54, 51, 0.1) !important; }
+        .explanation { font-size: 0.9em; color: #8b949e; margin-top: 8px; display: none; padding-top: 8px; border-top: 1px solid #30363d; }
         .hidden { display: none; }
     </style>
 </head>
@@ -39,186 +33,147 @@
 
 <div class="container">
     <div id="setupScreen" class="card">
-        <h2>සාදරයෙන් පිළිගනිමු!</h2>
-        <p>ඔබේ ඉලක්කය සැකසීමට පහත තොරතුරු ඇතුළත් කරන්න:</p>
-        <select id="userGrade">
-            <option value="12">Grade 12 (12 ශ්‍රේණිය)</option>
-            <option value="13">Grade 13 (13 ශ්‍රේණිය)</option>
-            <option value="revision">Revision (පුනරීක්ෂණ)</option>
+        <h2>ඔබේ ඉගෙනුම් මධ්‍යස්ථානය</h2>
+        <label>ශ්‍රේණිය තෝරන්න:</label>
+        <select id="gradeSelect">
+            <option value="6">Grade 6</option>
+            <option value="7">Grade 7</option>
+            <option value="11">Grade 11 (O/L)</option>
+            <option value="13">Grade 13 (A/L)</option>
         </select>
-        <input type="number" id="daysLeftInput" placeholder="විභාගයට තව දින කීයක් තිබේද? (උදා: 60)">
-        <button onclick="saveSetup()">වැඩපිළිවෙල ආරම්භ කරන්න</button>
+        
+        <label>විෂය තෝරන්න:</label>
+        <select id="subjectSelect">
+            <option value="science">විද්‍යාව (Science)</option>
+            <option value="maths">ගණිතය (Maths)</option>
+            <option value="history">ඉතිහාසය (History)</option>
+            <option value="chem">රසායන විද්‍යාව (Chemistry)</option>
+        </select>
+        
+        <label>විභාගයට ඇති දින ගණන:</label>
+        <input type="number" id="daysInput" placeholder="උදා: 180">
+        
+        <button onclick="saveSetup()">ඇතුල් වන්න</button>
     </div>
 
     <div id="dashboard" class="card hidden">
-        <h2 id="greetUser">මගේ ප්‍රගතිය (Progress Tracker)</h2>
+        <h2 id="dashTitle">ප්‍රගති වාර්තාව</h2>
         <div class="stats-grid">
-            <div class="stat-box">ඉතිරි දින<span class="stat-num" id="daysDisp">0</span></div>
-            <div class="stat-box">මුළු ලකුණු<span class="stat-num" id="scoreDisp">0</span></div>
+            <div class="stat-box">ඉතිරි දින<span id="dLeft" class="stat-num">0</span></div>
+            <div class="stat-box">මුළු ලකුණු<span id="tScore" class="stat-num">0</span></div>
+            <div class="stat-box">Grade<span id="gShow" class="stat-num">-</span></div>
         </div>
-        <div class="chart-container">
-            <canvas id="progressChart"></canvas>
-        </div>
-        <button onclick="startQuiz()">අද දින MCQ ආරම්භ කරන්න</button>
-        <button onclick="resetData()" style="margin-top:10px; background:none; color:var(--error); border:1px solid var(--error); font-size:12px; padding:5px;">සියලු දත්ත මකන්න (Reset)</button>
+        <div style="height: 200px;"><canvas id="progChart"></canvas></div>
+        <button onclick="startSession()" style="background:var(--primary); margin-top:20px;">අද දින ප්‍රශ්න පත්‍රය ආරම්භ කරන්න</button>
     </div>
 
     <div id="quizArea" class="card hidden">
-        <div id="qHeader" style="display:flex; justify-content:space-between; color:#aaa; margin-bottom:15px;">
-            <span id="qCountDisp">ප්‍රශ්නය 1 / 2</span>
-            <span id="gradeTag">Grade 12</span>
+        <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:0.8em; color:var(--primary);">
+            <span id="qIdxDisp">ප්‍රශ්නය 1</span>
+            <span id="subTag">Science</span>
         </div>
-        <div id="qContent">
-            <h3 id="questionText" style="line-height:1.5;">ප්‍රශ්නය මෙතැන දිස්වේ...</h3>
-            <div id="optionsContainer"></div>
-        </div>
-        <button id="nextBtn" class="hidden" style="background: var(--success); margin-top:20px;" onclick="processNext()">මීළඟ ප්‍රශ්නය / අවසන් කරන්න</button>
+        <h3 id="qTxt">ප්‍රශ්නය මෙතැන දිස්වේ...</h3>
+        <div id="optCont"></div>
+        <button id="nextBtn" class="hidden" onclick="nextQ()" style="margin-top:15px;">මීළඟ ප්‍රශ්නය</button>
     </div>
 </div>
 
 <script>
-    // Data Structure
-    let appData = JSON.parse(localStorage.getItem('chemStudentData')) || null;
-    let currentSessionScore = 0;
-    let currentQuestionIdx = 0;
-    let chartObj = null;
+    let db = JSON.parse(localStorage.getItem('schoolAppData')) || null;
+    let currentScore = 0, currentIdx = 0, chart;
 
-    // Questions Database (Sample)
-    const questionsDB = {
-        "12": [
-            { q: "පරමාණුවක න්‍යෂ්ටිය සොයාගනු ලැබුවේ කවුද?", o: ["ජෝන් ඩෝල්ටන්", "ජේ.ජේ. තොම්සන්", "අර්නස්ට් රදර්ෆර්ඩ්", "නීල්ස් බෝර්"], c: 2, ex: ["ඩෝල්ටන් පරමාණුක වාදය ඉදිරිපත් කළේය.", "තොම්සන් ඉලෙක්ට්‍රෝනය සොයාගත්තේය.", "රදර්ෆර්ඩ් රන්පත් පරීක්ෂාව මගින් න්‍යෂ්ටිය සොයාගත්තේය.", "බෝර් විසින් ශක්ති මට්ටම් හඳුන්වා දුන්නේය."] },
-            { q: "ms (භ්‍රමණ ක්වොන්ටම් අංකය) සඳහා විය හැකි අගයන් මොනවාද?", o: ["0, 1", "+1, -1", "+1/2, -1/2", "0 සිට n-1"], c: 2, ex: ["0 යනු භ්‍රමණ අගයක් නොවේ.", "භ්‍රමණය පූර්ණ සංඛ්‍යා නොවේ.", "භ්‍රමණය සැමවිටම +1/2 හෝ -1/2 වේ.", "මෙය l අගය සඳහා පරාසයයි."] }
+    // විෂය සහ ශ්‍රේණි අනුව ප්‍රශ්න (මෙතනට ඕනෑම ප්‍රමාණයක ප්‍රශ්න එකතු කළ හැක)
+    const questions = {
+        "11_science": [
+            {q: "සෛලයේ ශක්ති ඒකකය කුමක්ද?", o: ["න්‍යෂ්ටිය", "මයිටොකොන්ඩ්‍රියාව", "රයිබොසෝම", "සෛල ප්ලාස්මය"], c: 1, ex: ["න්‍යෂ්ටිය පාලන මධ්‍යස්ථානයයි.", "මයිටොකොන්ඩ්‍රියාවේ ATP නිපදවන බැවින් එය ශක්ති ඒකකයයි.", "රයිබොසෝම ප්‍රෝටීන් නිපදවයි.", "ප්ලාස්මය ද්‍රව්‍යයකි."]}
         ],
-        "13": [
-            { q: "එන්තැල්පි වෙනස (ΔH) ධන අගයක් ගන්නා ප්‍රතික්‍රියා?", o: ["තාපදායක", "තාප අවශෝෂක", "ස්වයංසිද්ධ", "සමතාපී"], c: 1, ex: ["තාපදායක වල ΔH සෘණ වේ.", "තාපය ලබාගන්නා විට පද්ධතියේ ශක්තිය වැඩි වී ΔH ධන වේ.", "ස්වයංසිද්ධතාව තීරණය වන්නේ ගිබ්ස් ශක්තියෙනි.", "සමතාපී වල උෂ්ණත්වය වෙනස් නොවේ."] }
+        "13_chem": [
+            {q: "H2O අණුවේ හැඩය කුමක්ද?", o: ["රේඛීය", "තලත්‍රිකෝණාකාර", "කෝණික / නැමුණු", "චතුස්තලීය"], c: 2, ex: ["රේඛීය හැඩය CO2 වල ඇත.", "BF3 තලත්‍රිකෝණාකාර වේ.", "ඔක්සිජන් මත ඇති හුදකලා ඉලෙක්ට්‍රෝන යුගල නිසා ජල අණුව කෝණික වේ.", "CH4 චතුස්තලීය වේ."]}
         ]
     };
 
     function saveSetup() {
-        const grade = document.getElementById('userGrade').value;
-        const days = document.getElementById('daysLeftInput').value;
-        if(!days || days < 1) return alert("කරුණාකර වලංගු දින ගණනක් ඇතුළත් කරන්න.");
-
-        appData = { grade: grade, totalDays: parseInt(days), history: [], totalPoints: 0 };
-        localStorage.setItem('chemStudentData', JSON.stringify(appData));
-        showDashboard();
+        db = {
+            grade: document.getElementById('gradeSelect').value,
+            subject: document.getElementById('subjectSelect').value,
+            days: document.getElementById('daysInput').value,
+            history: [], total: 0
+        };
+        localStorage.setItem('schoolAppData', JSON.stringify(db));
+        showDash();
     }
 
-    function showDashboard() {
+    function showDash() {
         document.getElementById('setupScreen').classList.add('hidden');
         document.getElementById('dashboard').classList.remove('hidden');
         document.getElementById('quizArea').classList.add('hidden');
-        
-        document.getElementById('daysDisp').innerText = appData.totalDays - appData.history.length;
-        document.getElementById('scoreDisp').innerText = appData.totalPoints;
-        updateChart();
+        document.getElementById('dLeft').innerText = db.days - db.history.length;
+        document.getElementById('tScore').innerText = db.total;
+        document.getElementById('gShow').innerText = db.grade;
+        initChart();
     }
 
-    function updateChart() {
-        const ctx = document.getElementById('progressChart').getContext('2d');
-        const labels = appData.history.map(h => "Day " + h.day);
-        const scores = appData.history.map(h => h.score);
-
-        if(chartObj) chartObj.destroy();
-        chartObj = new Chart(ctx, {
+    function initChart() {
+        const ctx = document.getElementById('progChart').getContext('2d');
+        if(chart) chart.destroy();
+        chart = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: labels,
-                datasets: [{
-                    label: 'ලබාගත් ලකුණු',
-                    data: scores,
-                    borderColor: '#3498db',
-                    backgroundColor: 'rgba(52, 152, 219, 0.1)',
-                    fill: true, tension: 0.4
-                }]
+                labels: db.history.map(h => "Day " + h.d),
+                datasets: [{ label: 'Score', data: db.history.map(h => h.s), borderColor: '#58a6ff', tension: 0.3 }]
             },
-            options: { responsive: true, maintainAspectRatio: false }
+            options: { maintainAspectRatio: false }
         });
     }
 
-    function startQuiz() {
+    function startSession() {
         document.getElementById('dashboard').classList.add('hidden');
         document.getElementById('quizArea').classList.remove('hidden');
-        document.getElementById('gradeTag').innerText = "Grade: " + appData.grade;
-        currentSessionScore = 0;
-        currentQuestionIdx = 0;
-        loadQuestion();
+        document.getElementById('subTag').innerText = db.subject.toUpperCase();
+        currentScore = 0; currentIdx = 0;
+        loadQ();
     }
 
-    function loadQuestion() {
-        const gradeList = questionsDB[appData.grade] || questionsDB["12"];
-        const q = gradeList[currentQuestionIdx];
+    function loadQ() {
+        const key = `${db.grade}_${db.subject}`;
+        const qList = questions[key] || questions["11_science"];
+        const q = qList[currentIdx];
         
-        document.getElementById('qCountDisp').innerText = `ප්‍රශ්නය ${currentQuestionIdx + 1} / ${gradeList.length}`;
-        document.getElementById('questionText').innerText = q.q;
-        const container = document.getElementById('optionsContainer');
-        container.innerHTML = "";
+        document.getElementById('qTxt').innerText = q.q;
+        const cont = document.getElementById('optCont');
+        cont.innerHTML = "";
         document.getElementById('nextBtn').classList.add('hidden');
 
         q.o.forEach((opt, i) => {
-            const div = document.createElement('div');
-            div.className = 'option';
-            div.innerHTML = `<b>${String.fromCharCode(65 + i)}.</b> ${opt} <div class="explanation" id="ex-${i}"></div>`;
-            div.onclick = () => checkAnswer(i, q);
-            container.appendChild(div);
+            const d = document.createElement('div');
+            d.className = 'option';
+            d.innerHTML = `<b>${i+1}.</b> ${opt} <div class="explanation">${q.ex[i]}</div>`;
+            d.onclick = () => {
+                document.querySelectorAll('.option').forEach(el => el.style.pointerEvents = 'none');
+                if(i === q.c) { d.classList.add('correct'); currentScore += 10; }
+                else { d.classList.add('wrong'); document.querySelectorAll('.option')[q.c].classList.add('correct'); }
+                document.querySelectorAll('.explanation').forEach(e => e.style.display = 'block');
+                document.getElementById('nextBtn').classList.remove('hidden');
+            };
+            cont.appendChild(d);
         });
     }
 
-    function checkAnswer(selectedIdx, q) {
-        document.querySelectorAll('.option').forEach(el => el.style.pointerEvents = 'none');
-        
-        q.o.forEach((_, i) => {
-            const optDiv = document.querySelectorAll('.option')[i];
-            const exDiv = document.querySelectorAll('.explanation')[i];
-            exDiv.style.display = 'block';
-            exDiv.innerText = q.ex[i];
-
-            if(i === q.c) {
-                optDiv.classList.add('correct-final');
-                const tag = document.createElement('span');
-                tag.className = 'fb-tag'; tag.style.color = 'var(--success)';
-                tag.innerText = "✓ නිවැරදි පිළිතුර";
-                exDiv.prepend(tag);
-            } else if(i === selectedIdx) {
-                optDiv.classList.add('wrong-final');
-                const tag = document.createElement('span');
-                tag.className = 'fb-tag'; tag.style.color = 'var(--error)';
-                tag.innerText = "✕ වැරදියි";
-                exDiv.prepend(tag);
-            }
-        });
-
-        if(selectedIdx === q.c) currentSessionScore += 10;
-        document.getElementById('nextBtn').classList.remove('hidden');
-    }
-
-    function processNext() {
-        const gradeList = questionsDB[appData.grade] || questionsDB["12"];
-        currentQuestionIdx++;
-        
-        if(currentQuestionIdx < gradeList.length) {
-            loadQuestion();
-        } else {
-            // Save Daily Progress
-            const newDay = appData.history.length + 1;
-            appData.history.push({ day: newDay, score: currentSessionScore });
-            appData.totalPoints += currentSessionScore;
-            localStorage.setItem('chemStudentData', JSON.stringify(appData));
-            alert(`අද දින වැඩ අවසන්! ලකුණු: ${currentSessionScore}`);
-            showDashboard();
+    function nextQ() {
+        const key = `${db.grade}_${db.subject}`;
+        const qList = questions[key] || questions["11_science"];
+        currentIdx++;
+        if(currentIdx < qList.length) loadQ();
+        else {
+            db.history.push({d: db.history.length + 1, s: currentScore});
+            db.total += currentScore;
+            localStorage.setItem('schoolAppData', JSON.stringify(db));
+            alert("අද දින වැඩ අවසන්!");
+            showDash();
         }
     }
 
-    function resetData() {
-        if(confirm("ඔබේ සියලුම ලකුණු සහ ප්‍රගතිය මැකීමට අවශ්‍යද?")) {
-            localStorage.removeItem('chemStudentData');
-            location.reload();
-        }
-    }
-
-    // Initialize
-    if(appData) showDashboard();
+    if(db) showDash();
 </script>
-
 </body>
 </html>
