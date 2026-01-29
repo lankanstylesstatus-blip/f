@@ -3,212 +3,245 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart School - Full Subject Tracker</title>
+    <title>Smart School Pro - Full Progress Tracker</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --bg: #0d1117; --card: #161b22; --primary: #58a6ff;
             --success: #238636; --error: #da3633; --text: #c9d1d9;
-            --opt-bg: #21262d;
+            --opt-bg: #21262d; --border: #30363d;
         }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 10px; }
+        body { font-family: 'Segoe UI', 'Iskoola Pota', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 10px; }
         .container { max-width: 850px; margin: auto; }
-        .card { background: var(--card); padding: 25px; border-radius: 15px; margin-bottom: 20px; border: 1px solid #30363d; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .card { background: var(--card); padding: 25px; border-radius: 15px; margin-bottom: 20px; border: 1px solid var(--border); box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
         
-        h2, h3 { color: var(--primary); text-align: center; }
-        label { display: block; margin-top: 15px; font-weight: bold; color: #8b949e; }
+        h2, h3 { color: var(--primary); text-align: center; margin-top: 0; }
+        label { display: block; margin-top: 15px; font-weight: bold; color: #8b949e; font-size: 0.9em; }
 
-        select, input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #30363d; background: #0d1117; color: white; margin-top: 5px; box-sizing: border-box; }
-        button { background: var(--success); color: white; border: none; padding: 15px; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 20px; transition: 0.3s; }
-        button:hover { opacity: 0.8; }
+        select, input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: #0d1117; color: white; margin-top: 5px; box-sizing: border-box; font-size: 15px; }
+        button { background: var(--success); color: white; border: none; padding: 15px; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 20px; font-size: 16px; transition: 0.3s; }
+        button:hover { filter: brightness(1.2); }
 
-        /* Dashboard & Progress */
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; margin: 20px 0; }
-        .stat-box { background: #0d1117; padding: 15px; border-radius: 10px; text-align: center; border: 1px solid #30363d; }
+        /* Dashboard Stats */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px; margin: 20px 0; }
+        .stat-box { background: #0d1117; padding: 15px; border-radius: 10px; text-align: center; border: 1px solid var(--border); }
         .stat-num { font-size: 1.4em; font-weight: bold; color: var(--primary); display: block; }
+        .chart-container { position: relative; height: 250px; width: 100%; margin: 20px 0; }
         
-        /* Quiz */
-        .option { background: var(--opt-bg); padding: 15px; border-radius: 10px; margin-bottom: 10px; cursor: pointer; border: 1px solid #30363d; transition: 0.2s; }
+        /* MCQ Area */
+        .option { background: var(--opt-bg); padding: 15px; border-radius: 10px; margin-bottom: 10px; cursor: pointer; border: 1px solid var(--border); transition: 0.2s; position: relative; }
         .option:hover { border-color: var(--primary); }
-        .correct { border-color: var(--success) !important; background: rgba(35, 134, 54, 0.1) !important; }
-        .wrong { border-color: var(--error) !important; background: rgba(218, 54, 51, 0.1) !important; }
-        .explanation { font-size: 0.9em; color: #8b949e; margin-top: 10px; display: none; padding-top: 10px; border-top: 1px solid #30363d; }
+        .correct { border-color: var(--success) !important; background: rgba(35, 134, 54, 0.15) !important; }
+        .wrong { border-color: var(--error) !important; background: rgba(218, 54, 51, 0.15) !important; }
+        .explanation { font-size: 0.9em; color: #8b949e; margin-top: 10px; display: none; padding-top: 10px; border-top: 1px solid var(--border); line-height: 1.5; }
         
         .hidden { display: none; }
-        .basket-group { padding: 10px; border: 1px dashed #444; border-radius: 8px; margin-top: 10px; }
+        .basket-group { padding: 15px; border: 1px dashed #444; border-radius: 10px; margin-top: 15px; background: rgba(255,255,255,0.02); }
+        .badge { background: var(--primary); color: #000; padding: 2px 8px; border-radius: 4px; font-size: 0.7em; font-weight: bold; vertical-align: middle; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div id="setupScreen" class="card">
-        <h2>Smart Student Planner</h2>
-        <p style="text-align:center; font-size: 0.9em;">ඔබේ ශ්‍රේණිය සහ විෂයන් තෝරන්න</p>
+        <h2>Smart Student Tracker</h2>
+        <p style="text-align:center; color:#8b949e;">ඔබේ ඉගෙනුම් සැලසුම සකස් කරන්න</p>
         
         <label>ශ්‍රේණිය (Grade):</label>
         <select id="gradeSelect">
-            <option value="10">Grade 10</option>
-            <option value="11">Grade 11 (O/L)</option>
+            <optgroup label="ප්‍රාථමික/ද්විතීයික">
+                <option value="6">Grade 6</option><option value="7">Grade 7</option><option value="8">Grade 8</option><option value="9">Grade 9</option>
+            </optgroup>
+            <optgroup label="සාමාන්‍ය පෙළ">
+                <option value="10">Grade 10</option><option value="11" selected>Grade 11 (O/L)</option>
+            </optgroup>
+            <optgroup label="උසස් පෙළ">
+                <option value="12">Grade 12 (A/L)</option><option value="13">Grade 13 (A/L)</option>
+            </optgroup>
         </select>
 
-        <label>අනිවාර්ය විෂයන් (Core Subjects):</label>
+        <label>අනිවාර්ය විෂයයන් (Core Subjects):</label>
         <select id="coreSubject">
-            <option value="sinhala">සිංහල</option>
-            <option value="maths">ගණිතය</option>
-            <option value="science">විද්‍යාව</option>
-            <option value="english">ඉංග්‍රීසි</option>
-            <option value="history">ඉතිහාසය</option>
-            <option value="religion">ආගම</option>
+            <option value="sinhala">සිංහල</option><option value="maths">ගණිතය</option><option value="science">විද්‍යාව</option>
+            <option value="english">ඉංග්‍රීසි</option><option value="history">ඉතිහාසය</option><option value="religion">ආගම</option>
         </select>
 
         <div class="basket-group">
-            <label>කාණ්ඩ විෂය I (Basket I):</label>
+            <h4 style="margin:0; font-size:0.85em; color:var(--primary);">කාණ්ඩ විෂයන් (Basket Subjects)</h4>
+            <label>I කාණ්ඩය:</label>
             <select id="basket1">
-                <option value="geo">භූගෝල විද්‍යාව</option>
-                <option value="civic">පුරවැසි අධ්‍යාපනය</option>
-                <option value="ict">ICT</option>
-                <option value="entre">ව්‍යවසායකත්ව අධ්‍යයනය</option>
+                <option value="geo">භූගෝල විද්‍යාව</option><option value="civic">පුරවැසි අධ්‍යාපනය</option><option value="ict">ICT</option>
+                <option value="entre">ව්‍යවසායකත්ව අධ්‍යයනය</option><option value="home">ගෘහ ආර්ථික විද්‍යාව</option>
             </select>
 
-            <label>කාණ්ඩ විෂය II (Basket II):</label>
+            <label>II කාණ්ඩය:</label>
             <select id="basket2">
-                <option value="music">සංගීතය</option>
-                <option value="dance">නර්තනය</option>
-                <option value="art">චිත්‍ර කලාව</option>
-                <option value="drama">නාට්‍ය හා රංග කලාව</option>
+                <option value="music">සංගීතය</option><option value="dance">නර්තනය</option><option value="art">චිත්‍ර කලාව</option>
+                <option value="drama">නාට්‍ය හා රංග කලාව</option><option value="lit">සාහිත්‍යය</option>
             </select>
 
-            <label>කාණ්ඩ විෂය III (Basket III):</label>
+            <label>III කාණ්ඩය:</label>
             <select id="basket3">
-                <option value="agri">කෘෂිකර්මය</option>
-                <option value="health">සෞඛ්‍ය හා ශාරීරික අධ්‍යාපනය</option>
-                <option value="tech">තාක්ෂණික විෂයන්</option>
+                <option value="agri">කෘෂිකර්මය</option><option value="health">සෞඛ්‍ය හා ශාරීරික අධ්‍යාපනය</option>
+                <option value="tech">තාක්ෂණික විෂයන්</option><option value="media">මාධ්‍ය අධ්‍යයනය</option>
             </select>
         </div>
 
-        <label>විභාගයට ඇති දින ගණන:</label>
+        <label>විභාගයට තව දින කීයක් තිබේද?</label>
         <input type="number" id="daysInput" value="60">
 
         <button onclick="saveSetup()">වැඩපිළිවෙල ආරම්භ කරන්න</button>
     </div>
 
     <div id="dashboard" class="card hidden">
-        <h2 id="userTitle">මගේ ප්‍රගතිය</h2>
+        <h2 id="userTitle">ප්‍රගති වාර්තාව</h2>
         <div class="stats-grid">
             <div class="stat-box">ඉතිරි දින<span id="dLeft" class="stat-num">0</span></div>
             <div class="stat-box">මුළු ලකුණු<span id="tScore" class="stat-num">0</span></div>
-            <div class="stat-box">Grade<span id="gShow" class="stat-num">-</span></div>
+            <div class="stat-box">ශ්‍රේණිය<span id="gShow" class="stat-num">-</span></div>
         </div>
-        <div style="height: 250px;"><canvas id="progChart"></canvas></div>
-        <button onclick="startSession()" style="background:var(--primary); margin-top:20px;">අද දින වැඩ ආරම්භ කරන්න</button>
-        <button onclick="localStorage.clear(); location.reload();" style="background:none; border:1px solid var(--error); color:var(--error); margin-top:10px; padding:5px; font-size:12px;">Reset All</button>
+        <div class="chart-container"><canvas id="progChart"></canvas></div>
+        <button onclick="startSession()" style="background:var(--primary); margin-top:10px;">අද දින වැඩ ආරම්භ කරන්න</button>
+        <button onclick="resetData()" style="background:none; border:1px solid var(--error); color:var(--error); margin-top:10px; font-size:11px; padding:5px;">සියලු දත්ත මකන්න</button>
     </div>
 
     <div id="quizArea" class="card hidden">
-        <div style="display:flex; justify-content:space-between; margin-bottom:15px; color:var(--primary); font-weight:bold;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:15px; color:var(--primary); font-weight:bold; font-size:0.9em;">
             <span id="qIdxDisp">ප්‍රශ්නය 1</span>
-            <span id="subTag">SCIENCE</span>
+            <span id="subTag" class="badge">SUBJECT</span>
         </div>
-        <h3 id="qTxt" style="text-align:left; line-height:1.4;">ප්‍රශ්නය මෙතැන දිස්වේ...</h3>
+        <h3 id="qTxt" style="text-align:left; line-height:1.5; font-size:1.2em;">ප්‍රශ්නය මෙතැන දිස්වේ...</h3>
         <div id="optCont"></div>
-        <button id="nextBtn" class="hidden" onclick="nextQ()">මීළඟ ප්‍රශ්නය</button>
+        <button id="nextBtn" class="hidden" onclick="processResult()" style="background:var(--success);">මීළඟ ප්‍රශ්නය / අවසන් කරන්න</button>
     </div>
 </div>
 
 <script>
-    let db = JSON.parse(localStorage.getItem('olTrackerData')) || null;
-    let currentScore = 0, currentIdx = 0, chart;
+    let userData = JSON.parse(localStorage.getItem('studentMasterData')) || null;
+    let sessionScore = 0, qIndex = 0, chartInstance = null;
 
-    const questions = {
-        "science": [
-            {q: "ශාකයක ප්‍රභාසංස්ලේෂණය වැඩිපුරම සිදුවන්නේ කුමන අවයවයේද?", o: ["මූලය", "පුෂ්පය", "පත්‍රය", "කඳ"], c: 2, ex: ["මූලය ජලය අවශෝෂණය කරයි.", "පුෂ්පය ප්‍රජනක අවයවයයි.", "පත්‍රවල හරිතප්‍රද වැඩි බැවින් ප්‍රභාසංස්ලේෂණය පත්‍රයේ සිදුවේ.", "කඳ ශාකය දරා සිටියි."]}
-        ],
-        "ict": [
-            {q: "පහත ඒවායින් ප්‍රධාන මතක උපාංගයක් (Primary Memory) වන්නේ කුමක්ද?", o: ["Hard Disk", "RAM", "Pen Drive", "CD"], c: 1, ex: ["Hard Disk ද්විතීයික මතකයකි.", "RAM යනු ප්‍රධාන මතකයයි. එය තාවකාලික මතකයකි.", "Pen Drive බාහිර මතකයකි.", "CD ද්විතීයික මතකයකි."]}
-        ]
+    // විෂයන් කිහිපයකට උදාහරණ ප්‍රශ්න (දත්ත පද්ධතිය)
+    const questionsBank = {
+        "science": [{q: "පදාර්ථයේ කුඩාම තැනුම් ඒකකය කුමක්ද?", o: ["අණුව", "පරමාණුව", "සෛලය", "ඉලෙක්ට්‍රෝනය"], c: 1, ex: ["අණුවක් සෑදෙන්නේ පරමාණු එකතු වීමෙනි.", "පරමාණුව යනු පදාර්ථයේ කුඩාම තැනුම් ඒකකයයි.", "සෛලය ජීවීන්ගේ තැනුම් ඒකකයයි.", "ඉලෙක්ට්‍රෝනය පරමාණුව තුළ ඇති උප පරමාණුක අංශුවකි."]}],
+        "ict": [{q: "පහත ඒවායින් ආදාන උපාංගයක් (Input Device) නොවන්නේ කුමක්ද?", o: ["මවුසය", "යතුරුපුවරුව", "මුද්‍රණ යන්ත්‍රය (Printer)", "ස්කෑනරය"], c: 2, ex: ["මවුසය ආදාන උපාංගයකි.", "යතුරුපුවරුව ආදාන උපාංගයකි.", "මුද්‍රණ යන්ත්‍රය ප්‍රතිදාන (Output) උපාංගයකි.", "ස්කෑනරය ආදාන උපාංගයකි."]}],
+        "history": [{q: "ලංකාවේ අවසාන රජු කවුද?", o: ["පරාක්‍රමබාහු රජු", "ශ්‍රී වික්‍රම රාජසිංහ රජු", "විමලධර්මසූරිය රජු", "රාජසිංහ රජු"], c: 1, ex: ["පරාක්‍රමබාහු රජු පොළොන්නරු යුගයට අයත්ය.", "ශ්‍රී වික්‍රම රාජසිංහ රජු මහනුවර අවසන් රජු වූ අතර ඔහු ලංකාවේ අවසාන රජුයි.", "විමලධර්මසූරිය රජු මහනුවර රාජධානිය පිහිටුවීය.", "රාජසිංහ රජවරු කිහිපදෙනෙක් සිටියහ."]}],
+        "maths": [{q: "ත්‍රිකෝණයක අභ්‍යන්තර කෝණවල එකතුව කීයද?", o: ["90°", "180°", "360°", "270°"], c: 1, ex: ["90° යනු සෘජුකෝණයකි.", "ඕනෑම ත්‍රිකෝණයක අභ්‍යන්තර කෝණ තුනේ එකතුව සැමවිටම 180° වේ.", "360° යනු චතුරස්‍රයක අභ්‍යන්තර කෝණවල එකතුවයි.", "270° යනු වට භ්‍රමණයෙන් 3/4 කි."]}],
+        "religion": [{q: "සිද්ධාර්ථ කුමාරයා උපත ලැබුවේ කොහේද?", o: ["බුද්ධගයාව", "කුසිනාරාව", "ලුම්බිණි සල් උයන", "ඉසිපතනය"], c: 2, ex: ["බුද්ධගයාවේදී බුද්ධත්වයට පත් විය.", "කුසිනාරාවේදී පිරිණිවන් පෑවේය.", "සිද්ධාර්ථ කුමාරයා උපත ලැබුවේ ලුම්බිණි සල් උයනේදීය.", "ඉසිපතනයේදී ප්‍රථම ධර්ම දේශනාව පැවැත්වීය."]}],
+        "sinhala": [{q: " 'අහස' යන්නට සමාන පදයක් නොවන්නේ කුමක්ද?", o: ["ගුවන", "නොබ", "අඹර", "ධරණිය"], c: 3, ex: ["ගුවන යනු අහසයි.", "නොබ යනු අහසයි.", "අඹර යනු අහසයි.", "ධරණිය යනු පොළොවයි."]}],
+        "english": [{q: "What is the past tense of 'Go'?", o: ["Going", "Goes", "Went", "Gone"], c: 2, ex: ["Going is present continuous.", "Goes is simple present (singular).", "Went is the simple past tense of 'Go'.", "Gone is the past participle."]}],
+        "geo": [{q: "ලෝකයේ විශාලතම සාගරය කුමක්ද?", o: ["අත්ලාන්තික්", "ඉන්දියන්", "පැසිෆික්", "ආක්ටික්"], c: 2, ex: ["අත්ලාන්තික් දෙවැනි විශාලතම සාගරයයි.", "ඉන්දියන් සාගරය ලංකාව වටා ඇත.", "පැසිෆික් සාගරය ලෝකයේ විශාලතම සාගරයයි.", "ආක්ටික් කුඩාම සාගරයයි."]}],
+        "civic": [{q: "ප්‍රජාතන්ත්‍රවාදී පාලනයක මූලික ලක්ෂණය කුමක්ද?", o: ["රාජාණ්ඩුව", "ජනතාවගේ පරමාධිපත්‍යය", "ඒකාධිපති පාලනය", "හමුදා පාලනය"], c: 1, ex: ["රාජාණ්ඩුව පරම්පරාගත පාලනයකි.", "ප්‍රජාතන්ත්‍රවාදයේදී බලය ජනතාව සතුය.", "ඒකාධිපති පාලනය මෙයට ප්‍රතිවිරුද්ධය.", "හමුදා පාලනය ප්‍රජාතන්ත්‍රවාදී නොවේ."]}],
+        "agri": [{q: "ප්‍රභාසංස්ලේෂණයට අත්‍යවශ්‍ය නොවන සාධකය කුමක්ද?", o: ["සූර්යාලෝකය", "හරිතප්‍රද", "කාබන්ඩයොක්සයිඩ්", "ඔක්සිජන්"], c: 3, ex: ["සූර්යාලෝකය ශක්තිය සපයයි.", "හරිතප්‍රද ආලෝකය අවශෝෂණය කරයි.", "කාබන්ඩයොක්සයිඩ් අමුද්‍රව්‍යයකි.", "ඔක්සිජන් ප්‍රභාසංස්ලේෂණයේ අතුරු ඵලයකි, එය අත්‍යවශ්‍ය සාධකයක් නොවේ."]}],
+        "health": [{q: "සමබල ආහාර වේලක තිබිය යුතු ප්‍රධාන පෝෂක කොටස් ගණන කීයද?", o: ["3", "6", "5", "4"], c: 1, ex: ["ප්‍රධාන පෝෂක 6ක් තිබිය යුතුය (කාබෝහයිඩ්‍රේට, ප්‍රෝටීන්, ලිපිඩ, විටමින්, ඛනිජ ලවණ, ජලය).", "නිවැරදි පිළිතුර 6 වේ.", "5 සහ 4 වැරදිය.", "පෝෂක කාණ්ඩ ලෙස ගත්තද මෙය 6 කි."]}],
+        "entre": [{q: "ව්‍යවසායකයෙකු සතු විය යුතු මූලික ලක්ෂණයක් වන්නේ?", o: ["අවදානම් දරා ගැනීම", "කම්මැලිකම", "ණය ගැනීම", "ව්‍යාපාර අනුකරණය"], c: 0, ex: ["ව්‍යවසායකයෙකු නව අවදානම් දරාගෙන නව නිර්මාණ කළ යුතුය.", "කම්මැලිකම ව්‍යාපාරයකට බාධාවකි.", "ණය ගැනීම අත්‍යවශ්‍ය ලක්ෂණයක් නොවේ.", "නිර්මාණශීලීත්වය අනුකරණයට වඩා වැදගත් වේ."]}],
+        "music": [{q: "පෙරදිග සංගීතයේ මූලික ස්වර සංඛ්‍යාව කීයද?", o: ["5", "8", "7", "12"], c: 2, ex: ["නිවැරදි පිළිතුර ස, රි, ග, ම, ප, ධ, නි යන ස්වර 7 වේ.", "කෝමල/තීව්‍ර ස්වර සමඟ 12ක් වේ, නමුත් මූලික ස්වර 7කි.", "5 වැරදිය.", "8 යනු සප්තකය සම්පූර්ණ කරන ස්වරයයි."]}],
+        "art": [{q: "ප්‍රාථමික වර්ණ තුන වන්නේ?", o: ["රතු, නිල්, කොළ", "රතු, කහ, නිල්", "තැඹිලි, කොළ, දම්", "සුදු, කළු, රතු"], c: 1, ex: ["ආලෝකයේ ප්‍රාථමික වර්ණ රතු, නිල්, කොළ වේ.", "වර්ණක වල (Paint) ප්‍රාථමික වර්ණ රතු, කහ, නිල් වේ.", "තැඹිලි, කොළ, දම් යනු ද්විතීයික වර්ණයි.", "සුදු සහ කළු උදාසීන වර්ණයි."]}],
+        "drama": [{q: "ලංකාවේ ගැමි නාට්‍ය විශේෂයක් නොවන්නේ?", o: ["සොකරි", "කෝලම්", "නූර්ති", "ගම්මඩු"], c: 2, ex: ["සොකරි ගැමි නාට්‍යයකි.", "කෝලම් ගැමි නාට්‍යයකි.", "නූර්ති යනු නූතන වේදිකා නාට්‍ය සම්ප්‍රදායකි.", "ගම්මඩු ශාන්තිකර්මයකි."]}],
+        "lit": [{q: "සැළලිහිණි සංදේශය රචනා කළේ කවුද?", o: ["ගුරුළුගෝමී", "තොටගමුවේ ශ්‍රී රාහුල හිමි", "විදාගම මෛත්‍රී හිමි", "පැරකුම්බා රජු"], c: 1, ex: ["ගුරුළුගෝමී අමාවතුර ලිවීය.", "සැළලිහිණිය ලිව්වේ තොටගමුවේ ශ්‍රී රාහුල හිමියන්ය.", "විදාගම හිමි ලෝවැඩ සඟරාව ලිවීය.", "පැරකුම්බා රජු කවි ලිවීය."]}],
+        "tech": [{q: "විදුලි ධාරාව මනින ඒකකය කුමක්ද?", o: ["වෝල්ට් (V)", "ඕම් (Ω)", "ඇම්පියර් (A)", "වොට් (W)"], c: 2, ex: ["වෝල්ට් මගින් විභව අන්තරය මනියි.", "ඕම් මගින් ප්‍රතිරෝධය මනියි.", "ඇම්පියර් මගින් විදුලි ධාරාව මනියි.", "වොට් මගින් ජවය මනියි."]}],
+        "dance": [{q: "උඩරට නැටුම් කලාවේ ප්‍රධාන වාද්‍ය භාණ්ඩය කුමක්ද?", o: ["දවුල", "තම්මැට්ටම", "ගැටබෙරය", "යක් බෙරය"], c: 2, ex: ["දවුල සබරගමු නැටුමට අයත්ය.", "තම්මැට්ටම පන්ජතුරු වාදනයට අයත්ය.", "ගැටබෙරය උඩරට නැටුමේ ප්‍රධාන බෙරයයි.", "යක් බෙරය පහතරට නැටුමට අයත්ය."]}],
+        "home": [{q: "ආහාර කල් තබා ගැනීමේ පැරණි ක්‍රමයක් වන්නේ?", o: ["ශීතකරණයේ තැබීම", "දුම් ගැසීම", "රසායනික ද්‍රව්‍ය දැමීම", "ටින් කිරීම"], c: 1, ex: ["ශීතකරණය නවීන ක්‍රමයකි.", "දුම් ගැසීම (Smoking) ඉතා පැරණි ක්‍රමයකි.", "රසායනික ක්‍රම නවීනයි.", "ටින් කිරීම කර්මාන්තයකි."]}],
+        "media": [{q: "සන්නිවේදනයේ මූලික අංගය කුමක්ද?", o: ["ග්‍රාහකයා", "නාලිකාව", "පණිවිඩය", "ඉහත සියල්ල"], c: 3, ex: ["පණිවිඩකරුවා, පණිවිඩය, නාලිකාව සහ ග්‍රාහකයා යන සියල්ල සන්නිවේදනයට අවශ්‍ය වේ.", "නිවැරදි පිළිතුර ඉහත සියල්ලයි.", "", ""]}],
     };
 
     function saveSetup() {
-        db = {
+        const days = document.getElementById('daysInput').value;
+        if(!days || days < 1) return alert("කරුණාකර වලංගු දින ගණනක් ඇතුළත් කරන්න.");
+
+        userData = {
             grade: document.getElementById('gradeSelect').value,
-            core: document.getElementById('coreSubject').value,
-            b1: document.getElementById('basket1').value,
-            b2: document.getElementById('basket2').value,
-            b3: document.getElementById('basket3').value,
-            days: document.getElementById('daysInput').value,
-            history: [], total: 0
+            subjects: [
+                document.getElementById('coreSubject').value,
+                document.getElementById('basket1').value,
+                document.getElementById('basket2').value,
+                document.getElementById('basket3').value
+            ],
+            daysGoal: parseInt(days),
+            history: [], totalPoints: 0
         };
-        localStorage.setItem('olTrackerData', JSON.stringify(db));
-        showDash();
+        localStorage.setItem('studentMasterData', JSON.stringify(userData));
+        showDashboard();
     }
 
-    function showDash() {
+    function showDashboard() {
         document.getElementById('setupScreen').classList.add('hidden');
         document.getElementById('dashboard').classList.remove('hidden');
         document.getElementById('quizArea').classList.add('hidden');
-        document.getElementById('dLeft').innerText = db.days - db.history.length;
-        document.getElementById('tScore').innerText = db.total;
-        document.getElementById('gShow').innerText = db.grade;
-        initChart();
+        
+        document.getElementById('dLeft').innerText = userData.daysGoal - userData.history.length;
+        document.getElementById('tScore').innerText = userData.totalPoints;
+        document.getElementById('gShow').innerText = "Gr. " + userData.grade;
+        renderChart();
     }
 
-    function initChart() {
+    function renderChart() {
         const ctx = document.getElementById('progChart').getContext('2d');
-        if(chart) chart.destroy();
-        chart = new Chart(ctx, {
+        if(chartInstance) chartInstance.destroy();
+        chartInstance = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: db.history.map(h => "Day " + h.d),
-                datasets: [{ label: 'ලකුණු මට්ටම', data: db.history.map(h => h.s), borderColor: '#58a6ff', backgroundColor: 'rgba(88, 166, 255, 0.1)', fill: true, tension: 0.3 }]
+                labels: userData.history.map(h => "Day " + h.day),
+                datasets: [{ label: 'Progress', data: userData.history.map(h => h.score), borderColor: '#58a6ff', backgroundColor: 'rgba(88, 166, 255, 0.1)', fill: true, tension: 0.3 }]
             },
-            options: { responsive: true, maintainAspectRatio: false }
+            options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: '#333' } } } }
         });
     }
 
     function startSession() {
         document.getElementById('dashboard').classList.add('hidden');
         document.getElementById('quizArea').classList.remove('hidden');
-        // අහඹු ලෙස විෂයක් තෝරාගැනීම (Core හෝ Basket එකකින්)
-        const subs = [db.core, db.b1, db.b2, db.b3];
-        const randomSub = subs[Math.floor(Math.random() * subs.length)];
+        const randomSub = userData.subjects[Math.floor(Math.random() * userData.subjects.length)];
         document.getElementById('subTag').innerText = randomSub.toUpperCase();
         
-        currentScore = 0; currentIdx = 0;
-        loadQ(randomSub);
+        sessionScore = 0; qIndex = 0;
+        loadQuestion(randomSub);
     }
 
-    function loadQ(sub) {
-        const qList = questions[sub] || questions["science"];
-        const q = qList[currentIdx];
+    function loadQuestion(sub) {
+        const list = questionsBank[sub] || questionsBank["science"];
+        const q = list[qIndex];
+        
+        document.getElementById('qIdxDisp').innerText = `ප්‍රශ්නය ${qIndex + 1}`;
         document.getElementById('qTxt').innerText = q.q;
         const cont = document.getElementById('optCont');
         cont.innerHTML = "";
         document.getElementById('nextBtn').classList.add('hidden');
 
         q.o.forEach((opt, i) => {
-            const d = document.createElement('div');
-            d.className = 'option';
-            d.innerHTML = `<b>${i+1}.</b> ${opt} <div class="explanation">${q.ex[i]}</div>`;
-            d.onclick = () => {
+            const div = document.createElement('div');
+            div.className = 'option';
+            div.innerHTML = `<b>${i+1}.</b> ${opt} <div class="explanation" id="ex-${i}"></div>`;
+            div.onclick = () => {
                 document.querySelectorAll('.option').forEach(el => el.style.pointerEvents = 'none');
-                if(i === q.c) { d.classList.add('correct'); currentScore += 10; }
-                else { d.classList.add('wrong'); document.querySelectorAll('.option')[q.c].classList.add('correct'); }
-                document.querySelectorAll('.explanation').forEach(e => e.style.display = 'block');
+                if(i === q.c) { div.classList.add('correct'); sessionScore += 10; }
+                else { div.classList.add('wrong'); document.querySelectorAll('.option')[q.c].classList.add('correct'); }
+                
+                document.querySelectorAll('.explanation').forEach((e, idx) => {
+                    e.style.display = 'block';
+                    e.innerText = q.ex[idx];
+                });
                 document.getElementById('nextBtn').classList.remove('hidden');
             };
-            cont.appendChild(d);
+            cont.appendChild(div);
         });
     }
 
-    function nextQ() {
-        // දැනට එක් ප්‍රශ්නයක් පමණක් පෙන්වයි. දත්ත වැඩි කරද්දී මෙය වෙනස් කළ හැක.
-        db.history.push({d: db.history.length + 1, s: currentScore});
-        db.total += currentScore;
-        localStorage.setItem('olTrackerData', JSON.stringify(db));
-        showDash();
+    function processResult() {
+        userData.history.push({ day: userData.history.length + 1, score: sessionScore });
+        userData.totalPoints += sessionScore;
+        localStorage.setItem('studentMasterData', JSON.stringify(userData));
+        alert("අද දින වැඩ අවසන්! ලකුණු: " + sessionScore);
+        showDashboard();
     }
 
-    if(db) showDash();
+    function resetData() {
+        if(confirm("ඔබේ සියලුම ලකුණු මකා දමන්නද?")) {
+            localStorage.removeItem('studentMasterData');
+            location.reload();
+        }
+    }
+
+    if(userData) showDashboard();
 </script>
 </body>
 </html>
