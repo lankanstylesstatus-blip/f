@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chemistry Smart Learner Pro</title>
+    <title>Smart Learner Pro - A/L Edition</title>
     <style>
         :root {
             --bg: #0a0a0a;
@@ -21,33 +21,32 @@
         .step { display: none; background: var(--card); padding: 35px; border-radius: 20px; box-shadow: 0 15px 40px rgba(0,0,0,0.6); }
         .active { display: block; }
 
-        /* Navigation Buttons */
         .btn-row { display: flex; gap: 15px; margin-top: 30px; }
-        .btn-next { background: var(--primary); color: white; border: none; padding: 14px 30px; border-radius: 12px; cursor: pointer; flex: 2; font-weight: bold; font-size: 16px; }
-        .btn-back { background: #27ae60; color: white; border: none; padding: 14px 30px; border-radius: 12px; cursor: pointer; flex: 1; font-weight: bold; font-size: 16px; }
+        .btn-next { background: var(--primary); color: white; border: none; padding: 14px 30px; border-radius: 12px; cursor: pointer; flex: 2; font-weight: bold; font-size: 16px; transition: 0.3s; }
+        .btn-next:hover { filter: brightness(1.2); }
+        .btn-back { background: #444; color: white; border: none; padding: 14px 30px; border-radius: 12px; cursor: pointer; flex: 1; font-weight: bold; }
 
-        /* Selection UI */
         .option-card { background: #222; border: 2px solid #333; padding: 20px; margin: 12px 0; border-radius: 12px; cursor: pointer; transition: 0.3s; }
         .option-card:hover { border-color: var(--primary); background: #282828; }
         input, select { width: 100%; padding: 15px; border-radius: 10px; border: 1px solid #444; background: #222; color: white; font-size: 16px; margin-top: 15px; }
 
-        /* Quiz UI */
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
-        .progress-bar { flex-grow: 1; height: 5px; background: #333; margin: 0 20px; border-radius: 3px; position: relative; }
-        .progress-fill { height: 100%; background: var(--primary); width: 0%; border-radius: 3px; transition: 0.5s; }
+        .progress-bar { flex-grow: 1; height: 8px; background: #333; margin: 0 20px; border-radius: 4px; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--primary); width: 0%; transition: 0.5s; }
+        
         .score-pill { padding: 5px 15px; border-radius: 20px; font-weight: bold; font-size: 0.9em; margin-left: 8px; }
         .s-wrong { background: rgba(231, 76, 60, 0.2); color: var(--error); border: 1px solid var(--error); }
         .s-right { background: rgba(46, 204, 113, 0.2); color: var(--success); border: 1px solid var(--success); }
 
-        .q-text { font-size: 1.4em; margin-bottom: 30px; line-height: 1.6; }
-        .mcq-opt { background: var(--opt-bg); padding: 18px; border-radius: 12px; cursor: pointer; margin-bottom: 15px; border: 1px solid transparent; transition: 0.2s; }
-        .correct-final { border-color: var(--success) !important; background: rgba(46, 204, 113, 0.05) !important; }
-        .wrong-final { border-color: var(--error) !important; background: rgba(231, 76, 60, 0.05) !important; }
+        .q-text { font-size: 1.3em; margin-bottom: 30px; line-height: 1.6; }
+        .mcq-opt { background: var(--opt-bg); padding: 18px; border-radius: 12px; cursor: pointer; margin-bottom: 15px; border: 2px solid transparent; transition: 0.2s; }
+        .correct-final { border-color: var(--success) !important; background: rgba(46, 204, 113, 0.1) !important; }
+        .wrong-final { border-color: var(--error) !important; background: rgba(231, 76, 60, 0.1) !important; }
 
-        .fb-tag { font-size: 0.9em; font-weight: bold; margin-top: 10px; display: flex; align-items: center; gap: 8px; }
-        .exp-text { font-size: 0.95em; color: var(--text-dim); margin-top: 6px; line-height: 1.5; }
-
-        .hint-section { background: #222; padding: 15px; border-radius: 10px; border-left: 4px solid #f1c40f; margin: 25px 0; display: none; }
+        .exp-text { font-size: 0.9em; color: var(--text-dim); margin-top: 8px; padding-top: 8px; border-top: 1px solid #333; }
+        .hint-section { background: #2b2b10; padding: 15px; border-radius: 10px; border-left: 4px solid #f1c40f; margin: 20px 0; display: none; }
+        
+        #historyList div { border-bottom: 1px solid #333; padding: 8px 0; display: flex; justify-content: space-between; }
     </style>
 </head>
 <body>
@@ -55,8 +54,11 @@
 <div class="container">
     <div id="step1" class="step active">
         <h2>පියවර 1: විෂය තෝරන්න</h2>
-        <div class="option-card" onclick="goToStep(2)">රසායන විද්‍යාව (Chemistry)</div>
-        <div class="option-card" style="opacity: 0.4; cursor: not-allowed;">භෞතික විද්‍යාව (ළඟදීම)</div>
+        <div class="option-card" onclick="setSubject('chemistry')">රසායන විද්‍යාව (Chemistry)</div>
+        <div class="option-card" onclick="setSubject('physics')">භෞතික විද්‍යාව (Physics)</div>
+        <div class="option-card" onclick="setSubject('biology')">ජීව විද්‍යාව (Biology)</div>
+        <div class="option-card" onclick="setSubject('combinedmaths')">සංයුක්ත ගණිතය (Maths)</div>
+        <div class="option-card" onclick="setSubject('econ')">ආර්ථික විද්‍යාව (Econ)</div>
     </div>
 
     <div id="step2" class="step">
@@ -65,103 +67,114 @@
         <input type="number" id="daysInput" placeholder="උදා: 100">
         <div class="btn-row">
             <button class="btn-back" onclick="goToStep(1)">Back</button>
-            <button class="btn-next" onclick="goToStep(3)">Next</button>
+            <button class="btn-next" onclick="showPlanner()">Next</button>
         </div>
     </div>
 
     <div id="step3" class="step">
-        <h2>පියවර 3: රසායන විද්‍යා අංශය</h2>
-        <select id="branchSelect">
-            <option value="general">සාමාන්‍ය රසායනය (General)</option>
-            <option value="inorganic">අකාබනික රසායනය (Inorganic)</option>
-            <option value="physical">භෞතික රසායනය (Physical)</option>
-            <option value="organic">කාබනික රසායනය (Organic)</option>
-        </select>
-        <div class="btn-row">
-            <button class="btn-back" onclick="goToStep(2)">Back</button>
-            <button class="btn-next" onclick="showPlanner()">වැඩපිළිවෙල පෙන්වන්න</button>
-        </div>
-    </div>
-
-    <div id="step4" class="step">
         <h2>ඔබේ ඉලක්කය</h2>
         <div id="plannerResult" style="text-align:center; font-size: 1.3em; padding: 30px; border: 1px dashed var(--primary); border-radius: 15px;"></div>
         <div class="btn-row">
-            <button class="btn-back" onclick="goToStep(3)">සංස්කරණය</button>
+            <button class="btn-back" onclick="goToStep(2)">සංස්කරණය</button>
             <button class="btn-next" onclick="startQuiz()">MCQ ආරම්භ කරන්න</button>
         </div>
     </div>
 
     <div id="quizStep" class="step">
         <div class="header">
-            <span id="qInfo" style="color: var(--text-dim);">1 / 1</span>
+            <span id="qInfo" style="color: var(--text-dim);">1 / 25</span>
             <div class="progress-bar"><div class="progress-fill" id="pFill"></div></div>
             <div style="display:flex;">
                 <div class="score-pill s-wrong">✕ <span id="wScore">0</span></div>
                 <div class="score-pill s-right">✓ <span id="rScore">0</span></div>
             </div>
         </div>
-
         <div id="qDisplay" class="q-text"></div>
         <div id="optionsDisplay"></div>
-
         <div id="hintBox" class="hint-section"></div>
-
-        <div class="btn-row" style="justify-content: flex-end;">
-            <button onclick="toggleHint()" style="background:none; border:none; color:var(--primary); cursor:pointer; font-weight:bold;">Show hint ⌃</button>
-            <button id="doneBtn" class="btn-next" style="display:none; flex:unset; padding: 10px 40px; border-radius: 25px;" onclick="nextQuestion()">Done</button>
+        <div class="btn-row">
+            <button onclick="toggleHint()" style="background:none; border:none; color:var(--primary); cursor:pointer; font-weight:bold;">Hint 💡</button>
+            <button id="doneBtn" class="btn-next" style="display:none;" onclick="nextQuestion()">මීළඟ ප්‍රශ්නය</button>
         </div>
+    </div>
+
+    <div id="resultStep" class="step">
+        <h2 style="text-align:center;">විභාග වාර්තාව</h2>
+        <div style="text-align:center; padding: 20px;">
+            <div id="scoreCircle" style="font-size: 4em; font-weight: bold; color: var(--success);">0%</div>
+            <p id="gradeText" style="font-size: 1.5em; font-weight: bold; margin: 10px 0;"></p>
+            <p id="feedbackMessage" style="color: var(--text-dim); line-height: 1.6;"></p>
+            
+            <div style="margin-top: 30px; background: #222; padding: 20px; border-radius: 15px; text-align: left;">
+                <h3 style="font-size: 1em; color: var(--primary); margin-top: 0;">පෙර දත්ත (Progress History)</h3>
+                <div id="historyList"></div>
+            </div>
+        </div>
+        <button class="btn-next" style="width:100%" onclick="goToStep(1)">මුලට යන්න</button>
     </div>
 </div>
 
 <script>
     const questionsDB = {
-        "general": [{
-            q: "5. ක්වොන්ටම් අංක කට්ටලයක් පිළිබඳ පහත සඳහන් කුමන ප්‍රකාශය වැරදිද?",
-            o: ["ms සඳහා +1/2 හෝ -1/2 යන අගයන් තිබිය හැක.", "l හි අගය සැමවිටම n ට වඩා කුඩා විය යුතුය.", "n = 3 විට l සඳහා විය හැකි අගයන් වන්නේ 0, 1, 2 ය.", "ml මගින් කාක්ෂිකයේ හැඩය තීරණය කරයි."],
-            c: 3, h: "කාක්ෂිකයක හැඩය සහ දිශානතිය තීරණය කරන අංක සිහිපත් කරන්න.",
-            exps: ["ms අගය භ්‍රමණය පෙන්වන අතර එය සැමවිටම +1/2 හෝ -1/2 වේ.", "l අගය 0 සිට n-1 දක්වා පරාසයක පවතින බැවින් එය සැමවිටම n ට වඩා කුඩාය.", "l අගය 0 සිට n-1 දක්වා වන බැවින් n=3 විට 0, 1, 2 (s,p,d) නිවැරදිය.", "කාක්ෂිකයේ හැඩය තීරණය කරන්නේ l අගයයි. ml මගින් දිශානතිය පෙන්වයි."]
-        }],
-        "inorganic": [{
-            q: "වාතයේ වැඩිපුරම අඩංගු වායුව කුමක්ද?",
-            o: ["ඔක්සිජන්", "හයිඩ්‍රජන්", "නයිට්‍රජන්", "ආගන්"],
-            c: 2, h: "වායුගෝලීය සංයුතිය ගැන සිතන්න.",
-            exps: ["ඔක්සිජන් වාතයේ 21% ක් පමණ අඩංගු වේ.", "හයිඩ්‍රජන් වාතයේ ඇත්තේ ඉතා අල්ප වශයෙනි.", "වාතයෙන් 78% ක්ම නයිට්‍රජන් වායුව අඩංගු බැවින් මෙය නිවැරදි පිළිතුරයි.", "ආගන් යනු වාතයේ ඇති උදාසීන වායුවකි (0.9% පමණ)."]
-        }],
-        "physical": [{
-            q: "පද්ධතියක එන්තැල්පි වෙනස (ΔH) ධන අගයක් ගන්නේ නම් එය?",
-            o: ["තාපදායක ප්‍රතික්‍රියාවකි", "තාප අවශෝෂක ප්‍රතික්‍රියාවකි", "සමතාපී ප්‍රතික්‍රියාවකි", "කිසිවක් නොවේ"],
-            c: 1, h: "තාපය පිටකිරීම සහ ලබාගැනීම අතර වෙනස සලකන්න.",
-            exps: ["තාපදායක ප්‍රතික්‍රියාවක ΔH අගය සෘණ වේ.", "තාපය අවශෝෂණය කරන විට පද්ධතියේ ශක්තිය වැඩි වන බැවින් ΔH ධන වේ.", "සමතාපී ප්‍රතික්‍රියාවක උෂ්ණත්වය වෙනස් නොවේ.", "නිවැරදි පිළිතුර B වේ."]
-        }],
-        "organic": [{
-            q: "පහත ඒවායින් ඇල්කයින වල පොදු සූත්‍රය කුමක්ද?",
-            o: ["CnH2n+2", "CnH2n", "CnH2n-2", "CnHn"],
-            c: 2, h: "ත්‍රිත්ව බන්ධන සහිත හයිඩ්‍රොකාබන වල සූත්‍රය.",
-            exps: ["මෙය ඇල්කේන වල පොදු සූත්‍රයයි.", "මෙය ඇල්කීන වල පොදු සූත්‍රයයි.", "ත්‍රිත්ව බන්ධනයක් සෑදීමට හයිඩ්‍රජන් පරමාණු 4ක් ඉවත් වන බැවින් CnH2n-2 නිවැරදිය.", "මෙය පොදු සූත්‍රයක් ලෙස භාවිත නොවේ."]
-        }]
+        "chemistry": [
+            { q: "1. විද්‍යුත් සෘණතාව වැඩිම මූලද්‍රව්‍යය කුමක්ද?", o: ["N", "O", "F", "Cl"], c: 2, h: "ආවර්තිතා වගුවේ දකුණට හා ඉහළට විද්‍යුත් සෘණතාව වැඩි වේ.", exps: ["N = 3.0", "O = 3.5", "F (4.0) වැඩිම අගයයි.", "Cl වල අගය F ට වඩා අඩුය."] },
+            { q: "2. ද්‍රව අවස්ථාවේ පවතින අලෝහය කුමක්ද?", o: ["P", "S", "Br", "I"], c: 2, h: "මෙය කාණ්ඩය 17 ට අයත් මූලද්‍රව්‍යයකි.", exps: ["ඝනයකි", "ඝනයකි", "Br යනු ද්‍රව අවස්ථාවේ පවතින එකම අලෝහයයි.", "ඝනයකි"] },
+            { q: "3. pH අගය 7 ට වඩා අඩු ද්‍රාවණයක්?", o: ["භාෂ්මික", "උදාසීන", "ආම්ලික", "සංරක්ෂක"], c: 2, h: "pH 0-7 පරාසය සලකන්න.", exps: ["pH > 7", "pH = 7", "pH < 7 ආම්ලික වේ.", "pH වෙනස්වීම් පාලනය කරයි."] },
+            { q: "4. CH4 අණුවේ හැඩය කුමක්ද?", o: ["තල ත්‍රිකෝණාකාර", "චතුස්තලීය", "පිරමිඩීය", "රේඛීය"], c: 1, h: "කාබන් වටා බන්ධන යුගල 4ක් ඇත.", exps: ["BF3", "CH4 පරිපූර්ණ චතුස්තලීය වේ.", "NH3", "CO2"] },
+            { q: "5. PV = nRT හි n යනු?", o: ["පීඩනය", "පරිමාව", "මවුල ගණන", "උෂ්ණත්වය"], c: 2, h: "Gas මවුල ප්‍රමාණය.", exps: ["P", "V", "n යනු මවුල ගණනයි.", "T"] }
+        ],
+        "physics": [
+            { q: "1. බලයේ (Force) SI ඒකකය?", o: ["J", "W", "N", "Pa"], c: 2, h: "F=ma", exps: ["ශක්තිය", "ක්ෂමතාව", "බලය මනින්නේ නිව්ටන් වලින්.", "පීඩනය"] },
+            { q: "2. ආලෝකයේ වේගය උපරිම වන්නේ?", o: ["ජලය", "වීදුරු", "රික්තය", "වාතය"], c: 2, h: "බාධක අවම තැන.", exps: ["වේගය අඩු වේ", "වේගය අඩු වේ", "රික්තය තුළ උපරිම වේ.", "රික්තයට වඩා මඳක් අඩුය"] },
+            { q: "3. g හි සම්මත අගය?", o: ["9.8", "10", "8.9", "11"], c: 0, h: "පෘථිවි ගුරුත්වය.", exps: ["9.8 ms⁻² නිවැරදිය.", "ආසන්න අගයකි.", "සිකුරු ග්‍රහයාගේ අගයකි.", "වැඩි අගයකි"] },
+            { q: "4. පරිපූර්ණ අම්මීටරයක ප්‍රතිරෝධය?", o: ["ඉතා වැඩි", "ශුන්‍ය", "100 Ohm", "අනන්ත"], c: 1, h: "ධාරාවට බාධා නොවිය යුතුය.", exps: ["ධාරාව නතර වේ", "පරිපූර්ණ අම්මීටරයක ප්‍රතිරෝධය ශුන්‍ය විය යුතුය.", "වැරදිය", "ධාරාව ගලා නොයයි"] },
+            { q: "5. ශක්තිය මැවිය නොහැකි බව පවසන්නේ?", o: ["නිව්ටන් නියම", "ශක්ති සංස්ථිති නියමය", "පැස්කල් නියම", "ඕම් නියම"], c: 1, h: "Energy conservation", exps: ["චලිතය ගැන", "ශක්ති සංස්ථිති නියමය නිවැරදිය.", "පීඩනය ගැන", "විදුලිය ගැන"] }
+        ],
+        "biology": [
+            { q: "1. සෛලයේ ශක්ති ප්‍රභවය?", o: ["න්‍යෂ්ටිය", "රයිබොසෝම", "මයිටොකොන්ඩ්‍රියා", "ගොල්ගි"], c: 2, h: "ATP නිපදවන තැන.", exps: ["පාලනය", "ප්‍රෝටීන", "මයිටොකොන්ඩ්‍රියා ශක්තිය නිපදවයි.", "ශ්‍රාවය"] },
+            { q: "2. ප්‍රභාසංස්ලේෂණයේ අතුරු ඵලය?", o: ["CO2", "H2O", "O2", "C6H12O6"], c: 2, h: "පිටවන වායුව.", exps: ["අමුද්‍රව්‍යයකි", "අමුද්‍රව්‍යයකි", "ඔක්සිජන් අතුරු ඵලයක් ලෙස පිටවේ.", "ප්‍රධාන ඵලයයි"] },
+            { q: "3. විශාලතම ග්‍රන්ථිය?", o: ["අග්න්‍යාශය", "අක්මාව", "තයිරොයිඩ්", "පිටියුටරි"], c: 1, h: "Liver", exps: ["මධ්‍යම", "අක්මාව විශාලතම වේ.", "බෙල්ලේ ඇත", "ඉතා කුඩාය"] },
+            { q: "4. රුධිරය කැටි ගැසීමට උදවු වන්නේ?", o: ["RBC", "WBC", "පට්ටිකා", "ප්ලාස්මා"], c: 2, h: "Platelets", exps: ["ඔක්සිජන්", "ආරක්ෂාව", "රුධිර පට්ටිකා රුධිරය කැටි ගස්වයි.", "ද්‍රවය"] },
+            { q: "5. ජාන විද්‍යාවේ පියා?", o: ["ඩාවින්", "මෙන්ඩල්", "පාස්චර්", "ලැමාර්ක්"], c: 1, h: "මෑ ශාක පරීක්ෂණ.", exps: ["පරිණාමය", "ග්‍රෙගර් මෙන්ඩල් නිවැරදිය.", "ක්ෂුද්‍ර ජීවී", "පරිණාමය"] }
+        ],
+        "combinedmaths": [
+            { q: "1. x² හි ව්‍යුත්පන්නය?", o: ["x", "2x", "x³", "1"], c: 1, h: "nx^(n-1)", exps: ["වැරදිය", "2x නිවැරදිය.", "අනුකලනය", "x හි ව්‍යුත්පන්නයයි"] },
+            { q: "2. sin²x + cos²x = ?", o: ["0", "1", "-1", "2"], c: 1, h: "මූලික සර්වසාම්‍යය.", exps: ["වැරදිය", "සැමවිටම 1 වේ.", "වැරදිය", "වැරදිය"] },
+            { q: "3. log 100 පාදය 10 නම්?", o: ["1", "2", "10", "100"], c: 1, h: "10^2 = 100", exps: ["log 10", "2 නිවැරදිය.", "පාදය", "අගය"] },
+            { q: "4. වෘත්තයක වර්ගඵලය?", o: ["2πr", "πr²", "πd", "4/3πr³"], c: 1, h: "r අරයයි.", exps: ["පරිධිය", "πr² වර්ගඵලයයි.", "පරිධිය", "ගෝල පරිමාව"] },
+            { q: "5. අනුක්‍රමණය (m) යනු?", o: ["x/y", "y/x", "dy/dx", "x+y"], c: 2, h: "Gradient", exps: ["වැරදිය", "වැරදිය", "dy/dx යනු අනුක්‍රමණයයි.", "වැරදිය"] }
+        ],
+        "econ": [
+            { q: "1. මූලික ආර්ථික ගැටලුව?", o: ["මුදල්", "හිඟකම", "වෙළඳාම", "බදු"], c: 1, h: "Scarcity", exps: ["ප්‍රතිඵලයකි", "සම්පත් හිඟකම මූලික ගැටලුවයි.", "ක්‍රියාවලියකි", "රජයේ ආදායමකි"] },
+            { q: "2. මිල වැඩි වන විට ඉල්ලුම් ප්‍රමාණය?", o: ["වැඩි වේ", "අඩු වේ", "ස්ථාවරයි", "ශුන්‍ය වේ"], c: 1, h: "ප්‍රතිලෝම සම්බන්ධය.", exps: ["වැරදිය", "මිල වැඩි වන විට ඉල්ලුම අඩු වේ.", "වෙනස් වේ", "වැරදිය"] },
+            { q: "3. නිෂ්පාදන සාධක ගණන?", o: ["2", "3", "4", "5"], c: 2, h: "භූමිය, ශ්‍රමය...", exps: ["මදිය", "මදිය", "සාධක 4 කි (භූමිය, ශ්‍රමය, ප්‍රාග්ධනය, ව්‍යවසායකත්වය).", "වැඩියි"] },
+            { q: "4. GDP යනු?", o: ["මුළු අපනයන", "මුළු නිෂ්පාදිතය", "මුළු බදු", "මුළු ණය"], c: 1, h: "Gross Domestic Product", exps: ["අංශයකි", "මුළු අවසාන භාණ්ඩ හා සේවා අගයයි.", "ආදායමකි", "වැරදිය"] },
+            { q: "5. ඒකාධිකාරී වෙළඳපොළ ලක්ෂණය?", o: ["බොහෝ විකුණුම්කරුවන්", "තනි විකුණුම්කරු", "තරඟය වැඩිවීම", "මිල පාලනයක් නැත"], c: 1, h: "Monopoly", exps: ["පූර්ණ තරඟකාරී", "සිටින්නේ එක් විකුණුම්කරුවෙකු පමණි.", "තරඟයක් නැත", "මිල පාලනය කළ හැක"] }
+        ]
     };
 
-    let currentIdx = 0;
-    let rScore = 0, wScore = 0;
-    let activeList = [];
+    let currentIdx = 0, rScore = 0, wScore = 0, activeList = [], selectedSub = "";
 
     function goToStep(s) {
         document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
-        document.getElementById(s === 'quizStep' ? 'quizStep' : 'step' + s).classList.add('active');
+        document.getElementById(s === 'quizStep' || s === 'resultStep' ? s : 'step' + s).classList.add('active');
+    }
+
+    function setSubject(sub) {
+        selectedSub = sub;
+        goToStep(2);
     }
 
     function showPlanner() {
         let days = document.getElementById('daysInput').value;
-        if(!days || days < 1) return alert("කරුණාකර දින ගණන ඇතුළත් කරන්න.");
+        if(!days || days < 1) return alert("දින ගණන ඇතුළත් කරන්න.");
         let daily = Math.ceil(15330 / days);
         document.getElementById('plannerResult').innerHTML = `විභාගය ජය ගැනීමට නම් ඔබ<br><span style="font-size: 1.8em; color:var(--success); font-weight:bold;">දිනකට MCQ ${daily} බැගින්</span><br>කළ යුතුය.`;
-        goToStep(4);
+        goToStep(3);
     }
 
     function startQuiz() {
-        let branch = document.getElementById('branchSelect').value;
-        activeList = questionsDB[branch];
+        activeList = questionsDB[selectedSub];
         currentIdx = 0; rScore = 0; wScore = 0;
         updateScoreBoard();
         loadQuestion();
@@ -179,13 +192,11 @@
 
         let container = document.getElementById('optionsDisplay');
         container.innerHTML = "";
-        let lbls = ['A.', 'B.', 'C.', 'D.'];
-
         q.o.forEach((opt, i) => {
             let div = document.createElement('div');
             div.className = 'mcq-opt';
             div.id = 'opt-' + i;
-            div.innerHTML = `<b>${lbls[i]}</b> ${opt} <div id="fb-${i}"></div>`;
+            div.innerHTML = `<b>${String.fromCharCode(65+i)}.</b> ${opt} <div id="fb-${i}"></div>`;
             div.onclick = () => handleCheck(i);
             container.appendChild(div);
         });
@@ -194,19 +205,18 @@
     function handleCheck(selected) {
         let q = activeList[currentIdx];
         document.querySelectorAll('.mcq-opt').forEach(el => el.style.pointerEvents = 'none');
-
+        
         q.o.forEach((_, i) => {
             let el = document.getElementById('opt-' + i);
             let fb = document.getElementById('fb-' + i);
-            
-            if(i === q.c) { // Correct Answer
+            if(i === q.c) {
                 el.classList.add('correct-final');
-                fb.innerHTML = `<div class="fb-tag" style="color:var(--success)">✓ Right answer</div><div class="exp-text">${q.exps[i]}</div>`;
-            } else if(i === selected) { // User's Wrong Choice
+                fb.innerHTML = `<div class="exp-text" style="color:var(--success)">✓ නිවැරදි පිළිතුර: ${q.exps[i]}</div>`;
+            } else if(i === selected) {
                 el.classList.add('wrong-final');
-                fb.innerHTML = `<div class="fb-tag" style="color:var(--error)">✕ Not quite</div><div class="exp-text">${q.exps[i]}</div>`;
-            } else { // Rationale for other options
-                fb.innerHTML = `<div class="exp-text" style="margin-top:8px; border-top:1px solid #333; padding-top:5px;">${q.exps[i]}</div>`;
+                fb.innerHTML = `<div class="exp-text" style="color:var(--error)">✕ වැරදියි: ${q.exps[i]}</div>`;
+            } else {
+                fb.innerHTML = `<div class="exp-text">${q.exps[i]}</div>`;
             }
         });
 
@@ -222,13 +232,40 @@
 
     function toggleHint() {
         let h = document.getElementById('hintBox');
-        h.style.display = (h.style.display === 'block') ? 'none' : 'block';
+        h.style.display = h.style.display === 'block' ? 'none' : 'block';
     }
 
     function nextQuestion() {
         currentIdx++;
         if(currentIdx < activeList.length) loadQuestion();
-        else { alert("අද දින ඉලක්කය සාර්ථකයි!"); goToStep(1); }
+        else showFinalResult();
+    }
+
+    function showFinalResult() {
+        goToStep('resultStep');
+        let percentage = Math.round((rScore / activeList.length) * 100);
+        document.getElementById('scoreCircle').innerText = percentage + "%";
+        
+        let grade = percentage >= 75 ? "විශිෂ්ටයි! (A)" : percentage >= 50 ? "සාමාන්‍යයි (C)" : "තව උත්සාහ කරන්න (S/W)";
+        document.getElementById('gradeText').innerText = grade;
+        document.getElementById('feedbackMessage').innerText = "ඔබ මෙම විෂය කොටසින් ලබාගත් සාර්ථකත්වය අනාගතයට මහත් රුකුලක් වනු ඇත.";
+
+        saveProgress(percentage);
+        displayHistory();
+    }
+
+    function saveProgress(score) {
+        let history = JSON.parse(localStorage.getItem('alSmartHistory')) || [];
+        history.push({ date: new Date().toLocaleDateString(), score: score, sub: selectedSub });
+        if(history.length > 5) history.shift();
+        localStorage.setItem('alSmartHistory', JSON.stringify(history));
+    }
+
+    function displayHistory() {
+        let history = JSON.parse(localStorage.getItem('alSmartHistory')) || [];
+        document.getElementById('historyList').innerHTML = history.reverse().map(h => 
+            `<div><span>${h.date} (${h.sub})</span><span style="color:var(--success)">${h.score}%</span></div>`
+        ).join('');
     }
 </script>
 
