@@ -97,6 +97,8 @@
 <script>
     let db = JSON.parse(localStorage.getItem('ss_pro_data')) || null;
     let currentSub = "", currentIdx = 0, score = 0, timer = null;
+    let myChart = null; // Chart එක පාලනය කිරීමට
+    let activeQuestions = []; // අහඹු ලෙස සකසන ප්‍රශ්න ගබඩා කිරීමට
 
     const subjectsMap = {
         "6": ["විද්‍යාව", "ගණිතය", "ඉතිහාසය", "සිංහල", "ඉංග්‍රීසි", "බුද්ධ ධර්මය", "භූගෝල විද්‍යාව", "පුරවැසි අධ්‍යාපනය"],
@@ -108,26 +110,17 @@
         "Tech": ["ඉංජිනේරු තාක්ෂණය", "ජෛව පද්ධති තාක්ෂණය", "SFT", "ICT"]
     };
 
-    // ප්‍රශ්න බැංකුව (සෑම විෂයකටම ප්‍රශ්න 20ක් එක් කළ හැකි පරිදි සකසා ඇත)
     const questionsDB = {
         "විද්‍යාව": [
             {q: "පරමාණුවක න්‍යෂ්ටිය තුළ පවතින්නේ?", o: ["ප්‍රෝටෝන හා ඉලෙක්ට්‍රෝන", "ප්‍රෝටෝන හා නියුට්‍රෝන", "නියුට්‍රෝන හා ඉලෙක්ට්‍රෝන", "ප්‍රෝටෝන පමණි"], c: 1, ex: "ප්‍රෝටෝන සහ නියුට්‍රෝන න්‍යෂ්ටියේ පවතින අතර ඉලෙක්ට්‍රෝන වටා ගමන් කරයි."},
             {q: "ප්‍රභාසංස්ලේෂණය සඳහා අවශ්‍ය නොවන සාධකය?", o: ["ජලය", "සූර්යාලෝකය", "ඔක්සිජන්", "කාබන්ඩයොක්සයිඩ්"], c: 2, ex: "ඔක්සිජන් ප්‍රභාසංස්ලේෂණයේදී පිටවන අතුරු ඵලයකි."},
             {q: "මිනිස් සිරුරේ විශාලතම ග්‍රන්ථිය කුමක්ද?", o: ["අග්න්‍යාශය", "පිටියුටරිය", "අක්මාව", "තයිරොයිඩ්"], c: 2, ex: "අක්මාව මිනිස් සිරුරේ ඇති විශාලතම ග්‍රන්ථියයි."},
-            // මෙලෙස ප්‍රශ්න 20ක් දක්වා එක් කරන්න...
+            {q: "සෛලයක ශක්ති ඒකකය කුමක්ද?", o: ["DNA", "RNA", "ATP", "Glucose"], c: 2, ex: "ATP සෛලීය ක්‍රියාවලීන් සඳහා ශක්තිය සපයයි."},
+            {q: "මිනිස් සිරුරේ අඩංගු වර්ණදේහ යුගල ගණන?", o: ["23", "46", "22", "44"], c: 0, ex: "මිනිස් සෛලයක යුගල 23ක් (මුළු 46ක්) පවතී."}
         ],
         "ගණිතය": [
             {q: "2x + 10 = 20 නම් x හි අගය?", o: ["5", "10", "15", "20"], c: 0, ex: "2x = 10, එබැවින් x = 5."},
-            {q: "ත්‍රිකෝණයක අභ්‍යන්තර කෝණවල එකතුව?", o: ["90°", "180°", "360°", "270°"], c: 1, ex: "ඕනෑම ත්‍රිකෝණයක කෝණ එකතුව 180° කි."},
-        ],
-        "ජීව විද්‍යාව": [
-            {q: "සෛලයක ශක්ති ඒකකය කුමක්ද?", o: ["DNA", "RNA", "ATP", "Glucose"], c: 2, ex: "ATP සෛලීය ක්‍රියාවලීන් සඳහා ශක්තිය සපයයි."},
-        ],
-        "සංයුක්ත ගණිතය": [
-             {q: "lim (x->0) (sin x / x) හි අගය?", o: ["0", "1", "අනන්තය", "-1"], c: 1, ex: "මෙය මූලික ත්‍රිකෝණමිතික සීමාවකි."},
-        ],
-        "ගිණුම්කරණය": [
-             {q: "වත්කම් = හිමිකම් + ?", o: ["වියදම්", "ආදායම්", "වගකීම්", "ලාභ"], c: 2, ex: "මූලික ගිණුම්කරණ සමීකරණය: වත්කම් = හිමිකම් + වගකීම්."},
+            {q: "ත්‍රිකෝණයක අභ්‍යන්තර කෝණවල එකතුව?", o: ["90°", "180°", "360°", "270°"], c: 1, ex: "ඕනෑම ත්‍රිකෝණයක කෝණ එකතුව 180° කි."}
         ]
     };
 
@@ -157,7 +150,7 @@
         document.getElementById('quizArea').classList.add('hidden');
         document.getElementById('dashboard').classList.remove('hidden');
 
-        document.getElementById('dLeft').innerText = db.totalDays - db.history.length;
+        document.getElementById('dLeft').innerText = Math.max(0, db.totalDays - db.history.length);
         document.getElementById('tScore').innerText = db.totalScore;
 
         const grid = document.getElementById('subjectGrid');
@@ -174,9 +167,16 @@
     }
 
     function startQuiz(sub) {
+        if (!questionsDB[sub]) {
+            alert("මෙම විෂයට අදාළ ප්‍රශ්න තවමත් ඇතුළත් කර නොමැත.");
+            return;
+        }
         currentSub = sub;
         currentIdx = 0;
         score = 0;
+        // ප්‍රශ්න අහඹු ලෙස මාරු කිරීම (Shuffle)
+        activeQuestions = [...questionsDB[sub]].sort(() => Math.random() - 0.5);
+        
         document.getElementById('dashboard').classList.add('hidden');
         document.getElementById('quizArea').classList.remove('hidden');
         loadQuestion();
@@ -184,17 +184,16 @@
 
     function loadQuestion() {
         clearInterval(timer);
-        const qList = questionsDB[currentSub] || questionsDB["විද්‍යාව"];
         
-        if(currentIdx >= qList.length || currentIdx >= 20) {
+        if(currentIdx >= activeQuestions.length || currentIdx >= 20) {
             finishQuiz();
             return;
         }
 
-        const q = qList[currentIdx];
-        document.getElementById('qCount').innerText = `ප්‍රශ්නය ${currentIdx + 1}/${Math.min(qList.length, 20)}`;
+        const q = activeQuestions[currentIdx];
+        document.getElementById('qCount').innerText = `ප්‍රශ්නය ${currentIdx + 1}/${Math.min(activeQuestions.length, 20)}`;
         document.getElementById('qTxt').innerText = q.q;
-        document.getElementById('pBar').style.width = ((currentIdx)/20)*100 + "%";
+        document.getElementById('pBar').style.width = ((currentIdx)/Math.min(activeQuestions.length, 20))*100 + "%";
         
         const cont = document.getElementById('optCont');
         cont.innerHTML = "";
@@ -219,7 +218,7 @@
             document.getElementById('timer').innerText = timeLeft;
             if(timeLeft <= 0) {
                 clearInterval(timer);
-                selectOption(-1, questionsDB[currentSub][currentIdx].c, null);
+                selectOption(-1, activeQuestions[currentIdx].c, null);
             }
         }, 1000);
     }
@@ -230,7 +229,7 @@
         opts.forEach(o => o.style.pointerEvents = 'none');
 
         if(idx === correct) {
-            el.classList.add('correct');
+            if(el) el.classList.add('correct');
             score += 5;
         } else {
             if(el) el.classList.add('wrong');
@@ -254,14 +253,32 @@
     }
 
     function renderChart() {
-        const ctx = document.getElementById('progChart').getContext('2d');
-        new Chart(ctx, {
+        const canvas = document.getElementById('progChart');
+        const ctx = canvas.getContext('2d');
+        
+        if (myChart) { myChart.destroy(); } // පරණ chart එක මකා දැමීම
+
+        myChart = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: db.history.map(h => "Day " + h.day),
-                datasets: [{ label: 'Score', data: db.history.map(h => h.score), borderColor: '#58a6ff', tension: 0.3 }]
+                labels: db.history.map(h => "දිනය " + h.day),
+                datasets: [{ 
+                    label: 'ලකුණු', 
+                    data: db.history.map(h => h.score), 
+                    borderColor: '#58a6ff', 
+                    backgroundColor: 'rgba(88, 166, 255, 0.1)',
+                    fill: true,
+                    tension: 0.3 
+                }]
             },
-            options: { responsive: true, maintainAspectRatio: false }
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false,
+                scales: {
+                    y: { beginAtZero: true, grid: { color: '#30363d' } },
+                    x: { grid: { color: '#30363d' } }
+                }
+            }
         });
     }
 
