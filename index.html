@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smart School Pro - Ultimate Learning Tracker</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
     <style>
         :root {
             --bg: #0d1117; --card: #161b22; --primary: #58a6ff;
@@ -20,13 +22,13 @@
         .menu-btn { background: var(--opt-bg); border: 1px solid var(--border); color: white; padding: 15px; border-radius: 10px; cursor: pointer; font-size: 14px; font-weight: bold; transition: 0.3s; text-align: center; }
         .menu-btn:hover { background: var(--primary); color: #000; transform: translateY(-3px); }
         
-        input, select { width: 100%; padding: 12px; margin-top: 10px; border-radius: 8px; border: 1px solid var(--border); background: #0d1117; color: white; }
+        input, select { width: 100%; padding: 12px; margin-top: 10px; border-radius: 8px; border: 1px solid var(--border); background: #0d1117; color: white; box-sizing: border-box; }
         
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
         .stat-box { background: #0d1117; padding: 15px; border-radius: 10px; text-align: center; border: 1px solid var(--border); }
         .stat-val { font-size: 1.5em; font-weight: bold; color: var(--primary); display: block; }
 
-        .option { background: var(--opt-bg); padding: 15px; border-radius: 10px; margin-bottom: 10px; cursor: pointer; border: 1px solid var(--border); transition: 0.2s; }
+        .option { background: var(--opt-bg); padding: 15px; border-radius: 10px; margin-bottom: 10px; cursor: pointer; border: 1px solid var(--border); transition: 0.2s; position: relative; }
         .correct { border-color: var(--success) !important; background: rgba(35, 134, 54, 0.2) !important; }
         .wrong { border-color: var(--error) !important; background: rgba(218, 54, 51, 0.2) !important; }
         
@@ -76,7 +78,7 @@
             <div class="stat-box">ඉතිරි දින<span id="dLeft" class="stat-val">0</span></div>
             <div class="stat-box">මුළු ලකුණු<span id="tScore" class="stat-val">0</span></div>
         </div>
-        <div style="height: 200px;"><canvas id="progChart"></canvas></div>
+        <div style="height: 250px; position: relative;"><canvas id="progChart"></canvas></div>
         <h3 style="text-align: left; margin-top: 20px;">විෂය තෝරන්න:</h3>
         <div id="subjectGrid" class="grid-menu"></div>
         <button onclick="resetData()" style="color:var(--error); background:none; border:none; margin-top:30px; cursor:pointer; width:100%; font-size:12px;">Reset All Data</button>
@@ -97,29 +99,28 @@
 <script>
     let db = JSON.parse(localStorage.getItem('ss_pro_data')) || null;
     let currentSub = "", currentIdx = 0, score = 0, timer = null;
-    let myChart = null; // Chart එක පාලනය කිරීමට
-    let activeQuestions = []; // අහඹු ලෙස සකසන ප්‍රශ්න ගබඩා කිරීමට
+    let myChart = null;
+    let activeQuestions = [];
 
     const subjectsMap = {
-        "6": ["විද්‍යාව", "ගණිතය", "ඉතිහාසය", "සිංහල", "ඉංග්‍රීසි", "බුද්ධ ධර්මය", "භූගෝල විද්‍යාව", "පුරවැසි අධ්‍යාපනය"],
-        "11": ["විද්‍යාව", "ගණිතය", "ඉතිහාසය", "සිංහල", "ඉංග්‍රීසි", "බුද්ධ ධර්මය", "ICT", "කෘෂිකර්මය", "වාණිජ්‍ය"],
-        "Bio": ["ජීව විද්‍යාව", "රසායන විද්‍යාව", "භෞතික විද්‍යාව", "කෘෂිකර්මය"],
-        "Maths": ["සංයුක්ත ගණිතය", "භෞතික විද්‍යාව", "රසායන විද්‍යාව", "ICT"],
-        "Commerce": ["ගිණුම්කරණය", "ව්‍යාපාර අධ්‍යයනය", "ආර්ථික විද්‍යාව", "ICT"],
-        "Art": ["සිංහල", "දේශපාලන විද්‍යාව", "ඉතිහාසය", "බෞද්ධ ශිෂ්ටාචාරය"],
-        "Tech": ["ඉංජිනේරු තාක්ෂණය", "ජෛව පද්ධති තාක්ෂණය", "SFT", "ICT"]
+        "6": ["විද්‍යාව", "ගණිතය", "ඉතිහාසය", "සිංහල"],
+        "11": ["විද්‍යාව", "ගණිතය", "ඉතිහාසය", "සිංහල", "ICT"],
+        "Bio": ["ජීව විද්‍යාව", "රසායන විද්‍යාව", "භෞතික විද්‍යාව"],
+        "Maths": ["සංයුක්ත ගණිතය", "භෞතික විද්‍යාව", "රසායන විද්‍යාව"],
+        "Commerce": ["ගිණුම්කරණය", "ව්‍යාපාර අධ්‍යයනය", "ආර්ථික විද්‍යාව"],
+        "Art": ["සිංහල", "දේශපාලන විද්‍යාව", "ඉතිහාසය"],
+        "Tech": ["ඉංජිනේරු තාක්ෂණය", "ජෛව පද්ධති තාක්ෂණය", "SFT"]
     };
 
+    // ප්‍රශ්න පද්ධතිය (LaTeX උදාහරණ සහිතව)
     const questionsDB = {
         "විද්‍යාව": [
-            {q: "පරමාණුවක න්‍යෂ්ටිය තුළ පවතින්නේ?", o: ["ප්‍රෝටෝන හා ඉලෙක්ට්‍රෝන", "ප්‍රෝටෝන හා නියුට්‍රෝන", "නියුට්‍රෝන හා ඉලෙක්ට්‍රෝන", "ප්‍රෝටෝන පමණි"], c: 1, ex: "ප්‍රෝටෝන සහ නියුට්‍රෝන න්‍යෂ්ටියේ පවතින අතර ඉලෙක්ට්‍රෝන වටා ගමන් කරයි."},
-            {q: "ප්‍රභාසංස්ලේෂණය සඳහා අවශ්‍ය නොවන සාධකය?", o: ["ජලය", "සූර්යාලෝකය", "ඔක්සිජන්", "කාබන්ඩයොක්සයිඩ්"], c: 2, ex: "ඔක්සිජන් ප්‍රභාසංස්ලේෂණයේදී පිටවන අතුරු ඵලයකි."},
-            {q: "මිනිස් සිරුරේ විශාලතම ග්‍රන්ථිය කුමක්ද?", o: ["අග්න්‍යාශය", "පිටියුටරිය", "අක්මාව", "තයිරොයිඩ්"], c: 2, ex: "අක්මාව මිනිස් සිරුරේ ඇති විශාලතම ග්‍රන්ථියයි."},
-            {q: "සෛලයක ශක්ති ඒකකය කුමක්ද?", o: ["DNA", "RNA", "ATP", "Glucose"], c: 2, ex: "ATP සෛලීය ක්‍රියාවලීන් සඳහා ශක්තිය සපයයි."},
-            {q: "මිනිස් සිරුරේ අඩංගු වර්ණදේහ යුගල ගණන?", o: ["23", "46", "22", "44"], c: 0, ex: "මිනිස් සෛලයක යුගල 23ක් (මුළු 46ක්) පවතී."}
+            {q: "ජල අණුවක රසායනික සූත්‍රය කුමක්ද?", o: ["$H_2O$", "$CO_2$", "$O_2$", "$NaCl$"], c: 0, ex: "ජලය සැදී ඇත්තේ හයිඩ්‍රජන් පරමාණු 2කින් සහ ඔක්සිජන් පරමාණු 1කිනි."},
+            {q: "පරමාණුවක න්‍යෂ්ටිය තුළ පවතින්නේ?", o: ["ප්‍රෝටෝන හා ඉලෙක්ට්‍රෝන", "ප්‍රෝටෝන හා නියුට්‍රෝන", "නියුට්‍රෝන හා ඉලෙක්ට්‍රෝන", "ප්‍රෝටෝන පමණි"], c: 1, ex: "ප්‍රෝටෝන සහ නියුට්‍රෝන න්‍යෂ්ටියේ පවතී."},
+            {q: "මිනිස් සිරුරේ විශාලතම ග්‍රන්ථිය?", o: ["අග්න්‍යාශය", "පිටියුටරිය", "අක්මාව", "තයිරොයිඩ්"], c: 2, ex: "අක්මාව සිරුරේ විශාලතම ග්‍රන්ථියයි."}
         ],
         "ගණිතය": [
-            {q: "2x + 10 = 20 නම් x හි අගය?", o: ["5", "10", "15", "20"], c: 0, ex: "2x = 10, එබැවින් x = 5."},
+            {q: "$2x + 10 = 20$ නම් $x$ හි අගය?", o: ["5", "10", "15", "20"], c: 0, ex: "$2x = 10$ නිසා $x = 5$ වේ."},
             {q: "ත්‍රිකෝණයක අභ්‍යන්තර කෝණවල එකතුව?", o: ["90°", "180°", "360°", "270°"], c: 1, ex: "ඕනෑම ත්‍රිකෝණයක කෝණ එකතුව 180° කි."}
         ]
     };
@@ -168,13 +169,12 @@
 
     function startQuiz(sub) {
         if (!questionsDB[sub]) {
-            alert("මෙම විෂයට අදාළ ප්‍රශ්න තවමත් ඇතුළත් කර නොමැත.");
+            alert("මෙම විෂයට අදාළ ප්‍රශ්න තවමත් ඇතුළත් කර නැත.");
             return;
         }
         currentSub = sub;
         currentIdx = 0;
         score = 0;
-        // ප්‍රශ්න අහඹු ලෙස මාරු කිරීම (Shuffle)
         activeQuestions = [...questionsDB[sub]].sort(() => Math.random() - 0.5);
         
         document.getElementById('dashboard').classList.add('hidden');
@@ -184,16 +184,15 @@
 
     function loadQuestion() {
         clearInterval(timer);
-        
-        if(currentIdx >= activeQuestions.length || currentIdx >= 20) {
+        if(currentIdx >= activeQuestions.length) {
             finishQuiz();
             return;
         }
 
         const q = activeQuestions[currentIdx];
-        document.getElementById('qCount').innerText = `ප්‍රශ්නය ${currentIdx + 1}/${Math.min(activeQuestions.length, 20)}`;
-        document.getElementById('qTxt').innerText = q.q;
-        document.getElementById('pBar').style.width = ((currentIdx)/Math.min(activeQuestions.length, 20))*100 + "%";
+        document.getElementById('qCount').innerText = `ප්‍රශ්නය ${currentIdx + 1}/${activeQuestions.length}`;
+        document.getElementById('qTxt').innerHTML = q.q;
+        document.getElementById('pBar').style.width = ((currentIdx)/activeQuestions.length)*100 + "%";
         
         const cont = document.getElementById('optCont');
         cont.innerHTML = "";
@@ -202,11 +201,13 @@
         q.o.forEach((opt, i) => {
             const d = document.createElement('div');
             d.className = 'option';
-            d.innerHTML = `${opt} <div class="explanation">${q.ex}</div>`;
+            d.innerHTML = `<span>${opt}</span><div class="explanation">${q.ex}</div>`;
             d.onclick = () => selectOption(i, q.c, d);
             cont.appendChild(d);
         });
 
+        // MathJax Render කිරීම
+        if(window.MathJax) MathJax.typeset();
         startTimer();
     }
 
@@ -230,7 +231,7 @@
 
         if(idx === correct) {
             if(el) el.classList.add('correct');
-            score += 5;
+            score += 10;
         } else {
             if(el) el.classList.add('wrong');
             opts[correct].classList.add('correct');
@@ -248,15 +249,13 @@
         db.totalScore += score;
         db.history.push({ day: db.history.length + 1, score: score });
         localStorage.setItem('ss_pro_data', JSON.stringify(db));
-        alert(`විෂය අවසන්! ඔබ ලබාගත් ලකුණු: ${score}`);
+        alert(`අවසන්! ලකුණු: ${score}`);
         showDashboard();
     }
 
     function renderChart() {
-        const canvas = document.getElementById('progChart');
-        const ctx = canvas.getContext('2d');
-        
-        if (myChart) { myChart.destroy(); } // පරණ chart එක මකා දැමීම
+        const ctx = document.getElementById('progChart').getContext('2d');
+        if (myChart) myChart.destroy();
 
         myChart = new Chart(ctx, {
             type: 'line',
@@ -275,7 +274,7 @@
                 responsive: true, 
                 maintainAspectRatio: false,
                 scales: {
-                    y: { beginAtZero: true, grid: { color: '#30363d' } },
+                    y: { beginAtZero: true, max: 100, grid: { color: '#30363d' } },
                     x: { grid: { color: '#30363d' } }
                 }
             }
@@ -283,7 +282,6 @@
     }
 
     function resetData() { if(confirm("සියලු දත්ත මකන්නද?")) { localStorage.clear(); location.reload(); } }
-
     if(db) showDashboard();
 </script>
 
